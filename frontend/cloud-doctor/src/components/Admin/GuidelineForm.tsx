@@ -155,68 +155,78 @@ export default function GuidelineForm({ services, initialData, onSave, onCancel 
 
             <div>
               <label className="block text-sm font-medium mb-2">• 점검 기준</label>
-              <div className="border rounded-md">
-                <div className="p-2 border-b bg-gray-50 flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const input = document.createElement('input');
-                      input.type = 'file';
-                      input.accept = 'image/*';
-                      input.onchange = (e) => {
-                        const file = (e.target as HTMLInputElement).files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onload = (e) => {
-                            const imageUrl = e.target?.result as string;
-                            const textarea = document.getElementById('checkCriteria') as HTMLTextAreaElement;
-                            const cursorPos = textarea.selectionStart;
-                            const textBefore = textarea.value.substring(0, cursorPos);
-                            const textAfter = textarea.value.substring(cursorPos);
-                            const newValue = textBefore + `\n[이미지: ${file.name}]\n` + textAfter;
-                            setFormData(prev => ({
-                              ...prev,
-                              content: { ...prev.content, checkCriteria: newValue }
-                            }));
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      };
-                      input.click();
-                    }}
-                    className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
-                  >
-                    이미지 삽입
-                  </button>
-                  <span className="text-xs text-gray-500 self-center">커서 위치에 이미지가 삽입됩니다</span>
-                </div>
-                <textarea
-                  id="checkCriteria"
-                  value={formData.content.checkCriteria}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    content: { ...prev.content, checkCriteria: e.target.value }
-                  }))}
-                  className="w-full p-3 border-0 rounded-b-md h-32 resize-none"
-                  placeholder="점검 기준을 작성하고, '이미지 삽입' 버튼으로 이미지를 추가하세요."
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">• Side-effect</label>
               <textarea
-                value={formData.content.sideEffect}
+                value={formData.content.checkCriteria}
                 onChange={(e) => setFormData(prev => ({
                   ...prev,
-                  content: { ...prev.content, sideEffect: e.target.value }
+                  content: { ...prev.content, checkCriteria: e.target.value }
                 }))}
                 className="w-full p-3 border rounded-md h-24"
                 required
               />
             </div>
           </div>
+        </div>
+
+        {/* 조치 방안 */}
+        <div>
+          <label className="block text-sm font-medium mb-2">조치 방안</label>
+          <div className="border rounded-md">
+            <div className="p-2 border-b bg-gray-50 flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = 'image/*';
+                  input.onchange = (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (e) => {
+                        const textarea = document.getElementById('actionPlan') as HTMLTextAreaElement;
+                        const cursorPos = textarea.selectionStart;
+                        const textBefore = textarea.value.substring(0, cursorPos);
+                        const textAfter = textarea.value.substring(cursorPos);
+                        const newValue = textBefore + `\n[이미지: ${file.name}]\n` + textAfter;
+                        setFormData(prev => ({
+                          ...prev,
+                          content: { ...prev.content, sideEffect: newValue }
+                        }));
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  };
+                  input.click();
+                }}
+                className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+              >
+                이미지 삽입
+              </button>
+              <span className="text-xs text-gray-500 self-center">커서 위치에 이미지가 삽입됩니다</span>
+            </div>
+            <textarea
+              id="actionPlan"
+              value={formData.content.sideEffect}
+              onChange={(e) => setFormData(prev => ({
+                ...prev,
+                content: { ...prev.content, sideEffect: e.target.value }
+              }))}
+              className="w-full p-3 border-0 rounded-b-md h-32 resize-none"
+              placeholder="조치 방안을 작성하고, '이미지 삽입' 버튼으로 이미지를 추가하세요."
+              required
+            />
+          </div>
+        </div>
+
+        {/* Side-effect */}
+        <div>
+          <label className="block text-sm font-medium mb-2">Side-effect</label>
+          <textarea
+            value={formData.notes}
+            onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+            className="w-full p-3 border rounded-md h-24"
+          />
         </div>
 
         {/* 미조치 사례 */}
@@ -251,15 +261,7 @@ export default function GuidelineForm({ services, initialData, onSave, onCancel 
           </button>
         </div>
 
-        {/* 비고 */}
-        <div>
-          <label className="block text-sm font-medium mb-2">비고</label>
-          <textarea
-            value={formData.notes}
-            onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-            className="w-full p-3 border rounded-md h-24"
-          />
-        </div>
+
 
         {/* 버튼 */}
         <div className="flex gap-4">

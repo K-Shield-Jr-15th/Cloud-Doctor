@@ -1,21 +1,15 @@
 import { useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { Ssgoi,SsgoiTransition } from "@ssgoi/react";
-import { fade } from "@ssgoi/react/view-transitions";
-
+import { AnimatePresence, motion } from "framer-motion";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import MainPage from "./components/MainPage";
 import { Guide, Account, Database, Deployment, Encryption, Logging, Monitoring, Network, Storage } from "./components/Guide";
 import { AdminPage } from "./components/Admin";
-
 import Checklist from "./components/Checklist";
 import Prowler from "./components/Prowler";
-// import Prowler from "./components/Prowler";
 
-const config = {
-  defaultTransition: fade()
-};
+
 
 function AppContent() {
   const [showDemoModal, setShowDemoModal] = useState(false);
@@ -23,13 +17,23 @@ function AppContent() {
   const isMainPage = location.pathname === '/';
 
   return (
-    <div className={isMainPage ? "" : "min-h-screen flex flex-col pt-16"}>
+    <div className={isMainPage ? "" : "min-h-screen flex flex-col"}>
       {!isMainPage && <Header />}
-      <Ssgoi config={config}>
-        <main className={isMainPage ? "" : "flex-1 p-6"} style={isMainPage ? {} : { position: "relative" }}>
-          <Routes>
+      
+      <main className={isMainPage ? "" : "flex-1 p-6 pt-20"}>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
             <Route path="/" element={<MainPage />} />
-            <Route path="/guide" element={<Guide />}>
+            <Route path="/guide" element={
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Guide />
+              </motion.div>
+            }>
               <Route path="account" element={<Account />} />
               <Route path="compute" element={<Database/>} />
               <Route path="storage" element={<Storage />} />
@@ -39,16 +43,30 @@ function AppContent() {
               <Route path="deployment" element={<Deployment />} />
               <Route path="encryption" element={<Encryption />} />
             </Route>  
-            <Route path="/prowler" element={<Prowler />} />
+            <Route path="/prowler" element={
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Prowler />
+              </motion.div>
+            } />
             <Route path="/checklist" element={
-              <SsgoiTransition id="checklist">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
                 <Checklist />
-              </SsgoiTransition>
-              }/>
+              </motion.div>
+            } />
             <Route path="/admin/*" element={<AdminPage />} />
-            </Routes>
-        </main>
-      </Ssgoi>
+          </Routes>
+        </AnimatePresence>
+      </main>
       {!isMainPage && <Footer onDemoClick={() => setShowDemoModal(true)} />}
     </div>
   );

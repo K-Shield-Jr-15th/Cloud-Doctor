@@ -1,9 +1,7 @@
-import { SsgoiTransition } from "@ssgoi/react";
 import GuidelineDisplay from '../GuidelineDisplay';
 
 export default function Database() {
   return (
-    <SsgoiTransition id="database">
       <section id="Guide">
         <div className="p-6">
           <GuidelineDisplay />
@@ -24,6 +22,5 @@ export default function Database() {
           </div>
         </div>
       </section>
-    </SsgoiTransition>
   );
 }

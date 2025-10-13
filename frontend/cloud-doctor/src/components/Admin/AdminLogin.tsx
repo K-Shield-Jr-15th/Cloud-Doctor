@@ -9,41 +9,56 @@ interface AdminLoginProps {
 export default function AdminLogin({ onLogin, loading }: AdminLoginProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    
+    if (!username.trim()) {
+      setError('사용자명을 입력해주세요.');
+      return;
+    }
+    
+    if (!password.trim()) {
+      setError('비밀번호를 입력해주세요.');
+      return;
+    }
     
     const success = await onLogin(username, password);
     if (success) {
-      navigate('/admin', { replace: true }); // replace로 뒤로가기 방지
+      navigate('/admin', { replace: true });
     } else {
-      alert('잘못된 관리자 정보입니다.');
+      setError('잘못된 관리자 정보입니다.');
     }
   };
 
   return (
     <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-6 text-center">관리자 로그인</h2>
-      <form onSubmit={handleSubmit}>
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
+          {error}
+        </div>
+      )}
+      <form onSubmit={handleSubmit} noValidate>
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">사용자명</label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-2 border rounded-md"
-            required
+            placeholder="사용자명"
+            className="w-full p-3 border rounded-md placeholder-gray-400"
           />
         </div>
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">비밀번호</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 border rounded-md"
-            required
+            placeholder="비밀번호"
+            className="w-full p-3 border rounded-md placeholder-gray-400"
           />
         </div>
         <button

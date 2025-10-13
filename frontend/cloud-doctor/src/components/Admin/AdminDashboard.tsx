@@ -18,6 +18,7 @@ export default function AdminDashboard({ adminUser, onLogout }: AdminDashboardPr
   const [checklists, setChecklists] = useState<ChecklistItem[]>([]);
   const [showChecklistGenerator, setShowChecklistGenerator] = useState<GuidelineDetail | null>(null);
   const [editingGuideline, setEditingGuideline] = useState<GuidelineDetail | null>(null);
+  const [showGuidelineForm, setShowGuidelineForm] = useState(false);
 
   const getPriorityLabel = (priority: string) => {
     switch (priority) {
@@ -28,7 +29,7 @@ export default function AdminDashboard({ adminUser, onLogout }: AdminDashboardPr
     }
   };
   
-  const isFormView = location.pathname === '/admin/guideline/new';
+
 
   const handleAddService = (serviceData: Omit<Service, 'id' | 'createdAt'>) => {
     const newService: Service = {
@@ -63,7 +64,7 @@ export default function AdminDashboard({ adminUser, onLogout }: AdminDashboardPr
       createdAt: new Date().toISOString()
     };
     setGuidelines(prev => [...prev, newDetailedGuideline]);
-    navigate('/admin');
+    setShowGuidelineForm(false);
   };
 
   const handleUpdateGuideline = (guidelineData: Omit<GuidelineDetail, 'id' | 'createdAt'>) => {
@@ -75,7 +76,6 @@ export default function AdminDashboard({ adminUser, onLogout }: AdminDashboardPr
       };
       setGuidelines(prev => prev.map(g => g.id === editingGuideline.id ? updatedGuideline : g));
       setEditingGuideline(null);
-      navigate('/admin');
     }
   };
 
@@ -91,7 +91,7 @@ export default function AdminDashboard({ adminUser, onLogout }: AdminDashboardPr
     setChecklists(prev => [...prev, newChecklist]);
   };
 
-  if (isFormView || editingGuideline) {
+  if (showGuidelineForm || editingGuideline) {
     return (
       <GuidelineForm
         services={services}
@@ -99,7 +99,7 @@ export default function AdminDashboard({ adminUser, onLogout }: AdminDashboardPr
         onSave={editingGuideline ? handleUpdateGuideline : handleSaveGuideline}
         onCancel={() => {
           setEditingGuideline(null);
-          navigate('/admin');
+          setShowGuidelineForm(false);
         }}
       />
     );
@@ -131,7 +131,7 @@ export default function AdminDashboard({ adminUser, onLogout }: AdminDashboardPr
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <h2 className="text-xl sm:text-2xl font-bold">가이드라인 관리</h2>
           <button
-            onClick={() => navigate('/admin/guideline/new')}
+            onClick={() => setShowGuidelineForm(true)}
             className="bg-green-500 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-md hover:bg-green-600 text-sm sm:text-base whitespace-nowrap"
             disabled={services.length === 0}
           >

@@ -1,3 +1,4 @@
+import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminLogin from './AdminLogin';
 import AdminDashboard from './AdminDashboard';
 import { useAuth } from '../../hooks/useAuth';
@@ -9,5 +10,9 @@ export default function AdminPage() {
     return <AdminLogin onLogin={login} loading={loading} />;
   }
 
-  return <AdminDashboard adminUser={adminUser} onLogout={logout} />;
+  return (
+    <Routes>
+      <Route path="/*" element={<AdminDashboard adminUser={adminUser} onLogout={logout} />} />
+    </Routes>
+  );
 }
