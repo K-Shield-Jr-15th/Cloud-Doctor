@@ -261,7 +261,15 @@ export default function GuidelineForm({ services, initialData, onSave, onCancel 
           </button>
         </div>
 
-
+        {/* 비고 */}
+        <div>
+          <label className="block text-sm font-medium mb-2">비고</label>
+          <textarea
+            value={formData.notes}
+            onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+            className="w-full p-3 border rounded-md h-24"
+          />
+        </div>
 
         {/* 버튼 */}
         <div className="flex gap-4">
