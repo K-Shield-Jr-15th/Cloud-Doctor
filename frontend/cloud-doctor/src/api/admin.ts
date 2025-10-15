@@ -1,80 +1,72 @@
+import axios from './axios';
 import { Service, GuidelineDetail } from '../types/guideline';
 
-// TODO: axios 설정으로 변경
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+interface LoginResponse {
+  message: string;
+  username: string;
+}
 
 export const adminApi = {
-  // 어드민 로그인
   login: async (username: string, password: string): Promise<boolean> => {
-    // TODO: 실제 API 호출로 변경
-    return username === 'admin' && password === 'admin123';
+    try {
+      await axios.post<LoginResponse>('/api/auth/login', { username, password });
+      sessionStorage.setItem('username', username);
+      return true;
+    } catch (error: any) {
+      console.error('로그인 실패:', error.response?.data || error.message);
+      return false;
+    }
   },
 
-  // 서비스 관리
+  register: async (username: string, email: string, password: string): Promise<boolean> => {
+    try {
+      await axios.post('/api/auth/register', { username, email, password });
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  logout: async (): Promise<void> => {
+    try {
+      await axios.post('/api/auth/logout');
+    } finally {
+      sessionStorage.removeItem('username');
+    }
+  },
+
   getServices: async (): Promise<Service[]> => {
-    // TODO: 실제 API 호출로 변경
-    // const response = await fetch(`${API_BASE_URL}/admin/services`);
-    // return response.json();
-    
-    const saved = localStorage.getItem('admin_services');
-    return saved ? JSON.parse(saved) : [];
+    const { data } = await axios.get('/admin/services');
+    return data;
   },
 
-  saveService: async (service: Service): Promise<void> => {
-    // TODO: 실제 API 호출로 변경
-    // await fetch(`${API_BASE_URL}/admin/services`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(service)
-    // });
-    
-    const services = await adminApi.getServices();
-    const updated = [...services, service];
-    localStorage.setItem('admin_services', JSON.stringify(updated));
+  saveService: async (service: Omit<Service, 'id'>): Promise<void> => {
+    await axios.post('/admin/services', service);
+  },
+
+  updateService: async (id: string, service: Partial<Service>): Promise<void> => {
+    await axios.put(`/admin/services/${id}`, service);
   },
 
   deleteService: async (serviceId: string): Promise<void> => {
-    // TODO: 실제 API 호출로 변경
-    // await fetch(`${API_BASE_URL}/admin/services/${serviceId}`, {
-    //   method: 'DELETE'
-    // });
-    
-    const services = await adminApi.getServices();
-    const updated = services.filter(s => s.id !== serviceId);
-    localStorage.setItem('admin_services', JSON.stringify(updated));
+    await axios.delete(`/admin/services/${serviceId}`);
   },
 
-  // 가이드라인 관리
   getGuidelines: async (): Promise<GuidelineDetail[]> => {
-    // TODO: 실제 API 호출로 변경
-    // const response = await fetch(`${API_BASE_URL}/admin/guidelines`);
-    // return response.json();
-    
-    const saved = localStorage.getItem('admin_detailed_guidelines');
-    return saved ? JSON.parse(saved) : [];
+    const { data } = await axios.get('/api/guidelines');
+    return data;
   },
 
-  saveGuideline: async (guideline: GuidelineDetail): Promise<void> => {
-    // TODO: 실제 API 호출로 변경
-    // await fetch(`${API_BASE_URL}/admin/guidelines`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(guideline)
-    // });
-    
-    const guidelines = await adminApi.getGuidelines();
-    const updated = [...guidelines, guideline];
-    localStorage.setItem('admin_detailed_guidelines', JSON.stringify(updated));
+  saveGuideline: async (guideline: Omit<GuidelineDetail, 'id'>): Promise<void> => {
+    await axios.post('/admin/guidelines', guideline);
   },
 
   deleteGuideline: async (guidelineId: string): Promise<void> => {
-    // TODO: 실제 API 호출로 변경
-    // await fetch(`${API_BASE_URL}/admin/guidelines/${guidelineId}`, {
-    //   method: 'DELETE'
-    // });
-    
-    const guidelines = await adminApi.getGuidelines();
-    const updated = guidelines.filter(g => g.id !== guidelineId);
-    localStorage.setItem('admin_detailed_guidelines', JSON.stringify(updated));
+    await axios.delete(`/admin/guidelines/${guidelineId}`);
+  },
+
+  getUsers: async (): Promise<any[]> => {
+    const { data } = await axios.get('/admin/users');
+    return data;
   }
 };

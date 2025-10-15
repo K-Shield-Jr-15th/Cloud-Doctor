@@ -1,14 +1,33 @@
-// TODO: axios 설정으로 변경
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+import axios from './axios';
 
 export const userApi = {
-  // 사용자용 가이드라인 조회 (읽기 전용)
-  getGuidelines: async (): Promise<string[]> => {
-    // TODO: 실제 API 호출로 변경
-    // const response = await fetch(`${API_BASE_URL}/guidelines`);
-    // return response.json();
-    
-    const saved = localStorage.getItem('admin_guidelines');
-    return saved ? JSON.parse(saved) : [];
+  getProviders: async () => {
+    const { data } = await axios.get('/api/providers');
+    return data;
+  },
+
+  getServicesByProvider: async (providerId: number) => {
+    const { data } = await axios.get(`/api/services/provider/${providerId}`);
+    return data;
+  },
+
+  getGuidelines: async () => {
+    const { data } = await axios.get('/api/guidelines');
+    return data;
+  },
+
+  getGuidelinesByService: async (serviceId: number) => {
+    const { data } = await axios.get(`/api/guidelines/service/${serviceId}`);
+    return data;
+  },
+
+  getChecklistsByGuideline: async (guidelineId: number) => {
+    const { data } = await axios.get(`/api/checklists/guideline/${guidelineId}`);
+    return data;
+  },
+
+  getUserChecklists: async (userId: number) => {
+    const { data } = await axios.get(`/api/user-checklists/${userId}`);
+    return data;
   }
 };

@@ -1,9 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { adminApi } from '../api/admin';
 
 export const useAuth = () => {
-  const [adminUser, setAdminUser] = useState<string | null>(null);
+  const [adminUser, setAdminUser] = useState<string | null>(() => sessionStorage.getItem('username'));
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const username = sessionStorage.getItem('username');
+    if (username) {
+      setAdminUser(username);
+    }
+  }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
     setLoading(true);
@@ -22,7 +29,8 @@ export const useAuth = () => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await adminApi.logout();
     setAdminUser(null);
   };
 
