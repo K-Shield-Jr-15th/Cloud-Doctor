@@ -353,21 +353,16 @@ export default function Checklist() {
   const totalScore = filteredChecklist.reduce((score, item) => {
     return answers[item.id] === true ? score + scorePerItem : score;
   }, 0);
-  const completedItems = filteredChecklist.filter(
-    (item) => answers[item.id] !== undefined
-  ).length;
-  const completionRate =
-    totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
 
   const resetAnswers = () => setAnswers({});
 
   return (
     <section
       id="Checklist"
-      className="min-h-screen bg-gradient-to-br from-primary-dark via-primary to-primary-dark py-12"
+      className="min-h-screen bg-gradient-to-br from-primary via-primary-dark to-slate-900 py-12"
     >
       <div className="p-6 max-w-5xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-beige to-primary-light bg-clip-text text-transparent">
+        <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
           🛡️ AWS 보안 체크리스트
         </h1>
 
@@ -379,8 +374,8 @@ export default function Checklist() {
               key={service}
               className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 shadow-sm ${
                 selectedServices.includes(service)
-                  ? "bg-gradient-to-r from-primary to-accent text-white shadow-lg scale-105"
-                  : "bg-primary-dark/50 text-primary-light border border-primary hover:border-accent hover:shadow-md"
+                  ? "bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg scale-105"
+                  : "bg-slate-700/50 text-slate-300 border border-slate-600 hover:border-cyan-500 hover:shadow-md"
               }`}
               onClick={() => toggleService(service)}
             >
@@ -392,7 +387,7 @@ export default function Checklist() {
         {/* Select All / Clear */}
         <div className="flex gap-2 mb-6">
           <button
-            className="px-5 py-2 rounded-xl bg-gradient-to-r from-green-400 to-green-500 text-white font-medium hover:from-green-600 hover:to-green-600 shadow-lg transition-all"
+            className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-medium hover:from-emerald-700 hover:to-teal-700 shadow-lg transition-all"
             onClick={() => {
               setSelectedServices(services);
               setAnswers({});
@@ -401,7 +396,7 @@ export default function Checklist() {
             Select All
           </button>
           <button
-            className="px-5 py-2 rounded-xl bg-gradient-to-r from-red-600 to-red-700 text-white font-medium hover:from-red-700 hover:to-red-800 shadow-lg transition-all"
+            className="px-5 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 text-white font-medium hover:from-rose-700 hover:to-red-700 shadow-lg transition-all"
             onClick={() => {
               setSelectedServices([]);
               setAnswers({});
@@ -411,7 +406,7 @@ export default function Checklist() {
           </button>
         </div>
         {/* 총점 - 고정 */}
-        <div className="sticky top-20 z-10 mb-8 p-6 bg-gradient-to-r from-primary to-accent rounded-2xl shadow-2xl">
+        <div className="sticky top-20 z-10 mb-8 p-6 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-2xl shadow-2xl">
           <div className="flex items-center justify-between text-white">
             <div>
               <p className="text-sm opacity-90">현재 점수</p>
@@ -420,48 +415,40 @@ export default function Checklist() {
                 <span className="text-2xl">/10</span>
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-sm opacity-90">진행률</p>
-                <p className="text-3xl font-bold">
-                  {completionRate.toFixed(0)}%
-                </p>
-              </div>
-              <button
-                onClick={resetAnswers}
-                className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-all hover:rotate-180 duration-500"
-                title="답변 초기화"
+            <button
+              onClick={resetAnswers}
+              className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-all hover:rotate-180 duration-500"
+              title="답변 초기화"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-              </button>
-            </div>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+            </button>
           </div>
         </div>
 
         {/* 체크리스트 테이블 */}
-        <div className="bg-primary-dark/50 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-primary">
+        <div className="bg-slate-800/50 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-slate-700">
           <table className="table-auto w-full border-collapse">
             <thead>
-              <tr className="bg-primary-dark/50 text-primary-light">
-                <th className="border border-primary p-4 text-left font-semibold">
+              <tr className="bg-slate-700/50 text-slate-200">
+                <th className="border border-slate-600 p-4 text-left font-semibold">
                   서비스
                 </th>
-                <th className="border border-primary p-4 text-left font-semibold">
+                <th className="border border-slate-600 p-4 text-left font-semibold">
                   항목
                 </th>
-                <th className="border border-primary p-4 text-center font-semibold">
+                <th className="border border-slate-600 p-4 text-center font-semibold">
                   체크
                 </th>
               </tr>
@@ -472,21 +459,21 @@ export default function Checklist() {
                 return (
                   <tr
                     key={item.id}
-                    className="hover:bg-primary-dark/30 transition-colors"
+                    className="hover:bg-slate-700/30 transition-colors"
                   >
-                    <td className="border border-primary p-4 text-primary-light">
+                    <td className="border border-slate-600 p-4 text-slate-300">
                       {item.service}
                     </td>
-                    <td className="border border-primary p-4 text-beige">
+                    <td className="border border-slate-600 p-4 text-slate-200">
                       {item.name}
                     </td>
-                    <td className="border border-primary p-4 text-center flex justify-center gap-2">
+                    <td className="border border-slate-600 p-4 text-center flex justify-center gap-2">
                       {/* O 버튼 */}
                       <button
                         className={`w-10 h-10 rounded-lg font-bold text-lg transition-all ${
                           answer === true
-                            ? "bg-gradient-to-br from-green-600 to-green-700 text-white shadow-lg scale-110"
-                            : "bg-primary-dark/50 text-surface border-2 border-primary hover:border-green-500 hover:text-green-400 hover:scale-105"
+                            ? "bg-gradient-to-br from-emerald-600 to-green-600 text-white shadow-lg scale-110"
+                            : "bg-slate-700/50 text-slate-400 border-2 border-slate-600 hover:border-emerald-500 hover:text-emerald-400 hover:scale-105"
                         }`}
                         onClick={() =>
                           setAnswers({ ...answers, [item.id]: true })
