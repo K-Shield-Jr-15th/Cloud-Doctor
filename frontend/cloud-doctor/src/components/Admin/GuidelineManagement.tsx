@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { adminApi } from '../../api/admin';
+import { GuidelineDetailModal } from './GuidelineDetailModal';
 
 interface Guideline {
   id: number;
@@ -27,7 +28,94 @@ export default function GuidelineManagement({
 }: GuidelineManagementProps) {
   const [guidelines, setGuidelines] = useState<Guideline[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedGuideline, setSelectedGuideline] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    loadGuidelines();
+  }, [serviceId]);
+
+  const loadGuidelines = async () => {
+    try {
+      const data = await adminApi.getGuidelines();
+      console.log('All guidelines data:', data);
+      // serviceId로 필터링 (필요시)
+      setGuidelines(data);
+    } catch (error) {
+      console.error('가이드라인 로드 실패:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getGuidelineById = async (id: number) => {
+    try {
+      const guideline = await adminApi.getGuideline(id);
+      console.log('Selected guideline:', guideline);
+      
+      // 데이터 구조 변환 - 백엔드 응답에 맞게 수정
+      const convertedGuideline = {
+        id: guideline.id.toString(),
+        title: guideline.title || '',
+        serviceId: guideline.serviceListId?.toString() || '',
+        serviceName: serviceName,
+        priority: guideline.importanceLevel === '긴급' ? 'urgent' : 
+                 guideline.importanceLevel === '중요' ? 'important' : 
+                 guideline.importanceLevel === 'urgent' ? 'urgent' :
+                 guideline.importanceLevel === 'important' ? 'important' : 'confirm',
+        content: {
+          whyDangerous: guideline.whyDangerous || '',
+          whatHappens: guideline.whatHappens || '',
+          checkCriteria: guideline.checkStandard || '',
+          sideEffect: guideline.sideEffects || '',
+          checkImages: []
+        },
+        uncheckedCases: (guideline.links || []).map(link => 
+          typeof link === 'string' ? {title: '', url: link} : link
+        ),
+        note1: guideline.note || '',
+        note2: '',
+        createdAt: guideline.createdAt || new Date().toISOString()
+      };
+      
+      setSelectedGuideline(convertedGuideline);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('가이드라인 상세 조회 실패:', error);
+    }
+  };
+
+  const updateGuideline = async (id: string, data: any) => {
+    try {
+      const updateData = {
+        title: data.title || '',
+        cloudProviderId: providerId,
+        serviceListId: serviceId,
+        importanceLevel: data.priority || 'confirm',
+        whyDangerous: data.content?.whyDangerous || '',
+        whatHappens: data.content?.whatHappens || '',
+        checkStandard: data.content?.checkCriteria || '',
+        solutionText: data.content?.solutionText || '',
+        sideEffects: data.content?.sideEffect || '',
+        note: data.note1 || '',
+        links: data.links || []
+      };
+      
+      console.log('Update data:', updateData); // 디버깅용
+      await adminApi.updateGuideline(Number(id), updateData);
+      await loadGuidelines();
+      setIsModalOpen(false);
+      setSelectedGuideline(null);
+    } catch (error) {
+      console.error('가이드라인 수정 실패:', error);
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedGuideline(null);
+  };
   const [formData, setFormData] = useState({
     title: '',
     importanceLevel: '확인요망',
@@ -40,20 +128,7 @@ export default function GuidelineManagement({
   });
   const [links, setLinks] = useState(['']);
 
-  useEffect(() => {
-    loadGuidelines();
-  }, [serviceId]);
 
-  const loadGuidelines = async () => {
-    try {
-      const data = await adminApi.getGuidelinesByService(serviceId);
-      setGuidelines(data);
-    } catch (error) {
-      console.error('가이드라인 로드 실패:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const addLink = () => {
     setLinks([...links, '']);
@@ -282,19 +357,27 @@ export default function GuidelineManagement({
         ) : (
           <div className="space-y-4">
             {guidelines.map((guideline) => (
-              <div key={guideline.id} className="border rounded-lg p-4">
+              <div 
+                key={guideline.id} 
+                className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => getGuidelineById(guideline.id)}
+              >
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-lg font-semibold">{guideline.title}</h3>
+                  <h3 className="text-lg font-semibold text-blue-600 hover:text-blue-800">{guideline.title}</h3>
                   <div className="flex gap-2">
                     <span className={`px-2 py-1 rounded text-sm ${
-                      guideline.importanceLevel === '긴급' ? 'bg-red-100 text-red-800' :
-                      guideline.importanceLevel === '중요' ? 'bg-yellow-100 text-yellow-800' :
+                      guideline.importanceLevel === '긴급' || guideline.importanceLevel === 'urgent' ? 'bg-red-100 text-red-800' :
+                      guideline.importanceLevel === '중요' || guideline.importanceLevel === 'important' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-blue-100 text-blue-800'
                     }`}>
-                      {guideline.importanceLevel}
+                      {guideline.importanceLevel === '긴급' || guideline.importanceLevel === 'urgent' ? '긴급' : 
+                       guideline.importanceLevel === '중요' || guideline.importanceLevel === 'important' ? '중요' : '확인요망'}
                     </span>
                     <button
-                      onClick={() => handleDelete(guideline.id, guideline.title)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(guideline.id, guideline.title);
+                      }}
                       className="text-red-500 hover:text-red-700 px-2 py-1 rounded"
                     >
                       삭제
@@ -304,13 +387,20 @@ export default function GuidelineManagement({
                 <div className="text-sm text-gray-600 space-y-2">
                   <p><strong>위험성:</strong> {guideline.whyDangerous}</p>
                   <p><strong>발생 가능한 문제:</strong> {guideline.whatHappens}</p>
-                  <p><strong>점검 기준:</strong> {guideline.checkCriteria}</p>
+                  <p><strong>점검 기준:</strong> {guideline.checkStandard}</p>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+      
+      <GuidelineDetailModal
+        guideline={selectedGuideline}
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onUpdate={updateGuideline}
+      />
     </div>
   );
 }

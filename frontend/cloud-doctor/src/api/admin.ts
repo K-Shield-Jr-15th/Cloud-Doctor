@@ -162,13 +162,38 @@ export const adminApi = {
 
   createGuideline: async (guidelineData: {
     title: string;
+    cloudProviderId: number;
+    serviceListId: number;
     importanceLevel: string;
     whyDangerous: string;
     whatHappens: string;
-    checkCriteria: string;
-    cloudProviderId: number;
-    serviceListId: number;
+    checkStandard: string;
+    solutionText?: string;
+    sideEffects?: string;
+    note?: string;
+    links?: string[];
   }): Promise<void> => {
     await axios.post('/admin/guidelines', guidelineData);
+  },
+
+  getGuideline: async (id: number): Promise<any> => {
+    const { data } = await axios.get(`/admin/guidelines/${id}`);
+    return data;
+  },
+
+  updateGuideline: async (id: number, guidelineData: {
+    title: string;
+    cloudProviderId: number;
+    serviceListId: number;
+    importanceLevel: string;
+    whyDangerous: string;
+    whatHappens: string;
+    checkStandard: string;
+    solutionText?: string;
+    sideEffects?: string;
+    note?: string;
+    links?: string[];
+  }): Promise<void> => {
+    await axios.put(`/admin/guidelines/${id}`, guidelineData);
   }
 };
