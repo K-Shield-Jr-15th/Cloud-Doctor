@@ -41,6 +41,7 @@ CREATE TABLE service_lists (
     cloud_provider_id BIGINT NOT NULL REFERENCES cloud_providers(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
     display_name VARCHAR(100) NOT NULL,
+    service_real_case_count INT DEFAULT 0 NOT NULL,
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -88,6 +89,8 @@ CREATE TABLE guideline_links (
 -- Checklists table (관리자가 가이드라인 하위에 생성, 제목만)
 CREATE TABLE checklists (
     id BIGSERIAL PRIMARY KEY,
+    cloud_provider_id BIGINT NOT NULL REFERENCES cloud_providers(id),
+    service_list_id BIGINT NOT NULL REFERENCES service_lists(id),
     guideline_id BIGINT NOT NULL REFERENCES guidelines(id) ON DELETE CASCADE,
     title VARCHAR(200) NOT NULL,
     is_active BOOLEAN DEFAULT true,
@@ -126,6 +129,40 @@ INSERT INTO cloud_providers (name, display_name) VALUES
 ('GCP', 'Google Cloud Platform'),
 ('Azure', 'Microsoft Azure');
 
+-- Insert admin users
+INSERT INTO users (username, password, email, full_name, role, is_active) VALUES
+('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lbdxIcyuv4YSjbLye', 'admin1@example.com', '관리자1', 'ADMIN', true);
+
+-- Insert AWS services
+INSERT INTO service_lists (cloud_provider_id, name, display_name, service_real_case_count, is_active, created_by) VALUES
+(1, 'ec2', 'Amazon EC2', 41, true, 1),
+(1, 's3', 'Amazon S3', 20, true, 1),
+(1, 'iam', 'AWS IAM', 152, true, 1),
+(1, 'vpc', 'Amazon VPC', 5, true, 1),
+(1, 'lambda', 'AWS Lambda', 5, true, 1),
+(1, 'rds', 'Amazon RDS', 6, true, 1),
+(1, 'cloudtrail', 'AWS CloudTrail', 5, true, 1),
+(1, 'eks', 'Amazon EKS', 7, true, 1),
+(1, 'kms', 'AWS KMS', 3, true, 1),
+(1, 'sns', 'Amazon SNS', 3, true, 1),
+(1, 'sqs', 'Amazon SQS', 2, true, 1),
+(1, 'route53', 'Amazon Route 53', 7, true, 1),
+(1, 'organizations', 'AWS Organizations', 4, true, 1),
+(1, 'ecr', 'Amazon ECR', 3, true, 1),
+(1, 'ssm', 'AWS Systems Manager', 4, true, 1),
+(1, 'guardduty', 'Amazon GuardDuty', 3, true, 1),
+(1, 'cognito', 'Amazon Cognito', 9, true, 1),
+(1, 'cloudformation', 'AWS CloudFormation', 4, true, 1),
+(1, 'opensearch', 'AWS OpenSearch Service', 2, true, 1),
+(1, 'elasti beanstalk', 'AWS Elastic Beanstalk', 3, true, 1),
+(1, 'redshift', 'Amazon Redshift', 2, true, 1),
+(1, 'glue', 'AWS Glue', 3, true, 1),
+(1, 'service catalog', 'AWS Service Catalog', 3, true, 1),
+(1, 'documentdb', 'Amazon DocumentDB', 2, true, 1),
+(1, 'bedrock', 'Amazon Bedrock', 4, true, 1),
+(1, 'ses', 'Amazon SES', 2, true, 1),
+(1, 'appstream', 'Amazon AppStream 2.0', 2, true, 1);
+
 -- Create indexes
 CREATE INDEX idx_refresh_tokens_user ON refresh_tokens(user_id);
 CREATE INDEX idx_refresh_tokens_expires ON refresh_tokens(expires_at);
@@ -136,6 +173,8 @@ CREATE INDEX idx_guidelines_service_list ON guidelines(service_list_id);
 CREATE INDEX idx_guidelines_created_by ON guidelines(created_by);
 CREATE INDEX idx_guideline_solution_images_guideline ON guideline_solution_images(guideline_id);
 CREATE INDEX idx_guideline_links_guideline ON guideline_links(guideline_id);
+CREATE INDEX idx_checklists_cloud_provider ON checklists(cloud_provider_id);
+CREATE INDEX idx_checklists_service_list ON checklists(service_list_id);
 CREATE INDEX idx_checklists_guideline ON checklists(guideline_id);
 CREATE INDEX idx_checklists_created_by ON checklists(created_by);
 CREATE INDEX idx_user_checklist_results_user ON user_checklist_results(user_id);

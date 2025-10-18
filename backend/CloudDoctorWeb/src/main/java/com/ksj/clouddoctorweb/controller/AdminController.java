@@ -1,8 +1,11 @@
 package com.ksj.clouddoctorweb.controller;
 
 import com.ksj.clouddoctorweb.dto.GuidelineRequest;
+import com.ksj.clouddoctorweb.dto.GuidelineLinkRequest;
 import com.ksj.clouddoctorweb.dto.ServiceListRequest;
 import com.ksj.clouddoctorweb.dto.ServiceListResponse;
+import com.ksj.clouddoctorweb.dto.ChecklistRequest;
+import com.ksj.clouddoctorweb.dto.ChecklistResponse;
 import com.ksj.clouddoctorweb.entity.*;
 import com.ksj.clouddoctorweb.repository.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +40,8 @@ public class AdminController {
     private final CloudProviderRepository cloudProviderRepository;
     private final UserRepository userRepository;
     private final GuidelineRepository guidelineRepository;
+    private final GuidelineLinkRepository guidelineLinkRepository;
+    private final ChecklistRepository checklistRepository;
     
     /**
      * 서비스 리스트 생성
@@ -74,6 +80,7 @@ public class AdminController {
         serviceList.setCloudProvider(provider);
         serviceList.setName(request.getName().trim());
         serviceList.setDisplayName(displayName);
+        serviceList.setServiceRealCaseCount(request.getServiceRealCaseCount() != null ? request.getServiceRealCaseCount() : 0);
         serviceList.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
         serviceList.setCreatedBy(admin);
         
@@ -95,6 +102,7 @@ public class AdminController {
         
         serviceList.setName(request.getName());
         serviceList.setDisplayName(request.getDisplayName());
+        serviceList.setServiceRealCaseCount(request.getServiceRealCaseCount());
         serviceList.setIsActive(request.getIsActive());
         
         ServiceList updated = serviceListRepository.save(serviceList);
@@ -173,12 +181,13 @@ public class AdminController {
         
         // 링크 처리
         if (request.getLinks() != null && !request.getLinks().isEmpty()) {
-            for (String url : request.getLinks()) {
-                if (url != null && !url.trim().isEmpty()) {
+            for (GuidelineLinkRequest linkDto : request.getLinks()) {
+                if (linkDto.getUrl() != null && !linkDto.getUrl().trim().isEmpty()) {
                     GuidelineLink link = new GuidelineLink();
                     link.setGuideline(saved);
-                    link.setUrl(url.trim());
-                    // GuidelineLink 저장 로직 추가 필요
+                    link.setTitle(linkDto.getTitle());
+                    link.setUrl(linkDto.getUrl().trim());
+                    guidelineLinkRepository.save(link);
                 }
             }
         }
@@ -195,7 +204,143 @@ public class AdminController {
         response.put("whyDangerous", saved.getWhyDangerous());
         response.put("whatHappens", saved.getWhatHappens());
         response.put("checkStandard", saved.getCheckStandard());
+        response.put("solutionText", saved.getSolutionText());
+        response.put("sideEffects", saved.getSideEffects());
+        response.put("note", saved.getNote());
         response.put("createdAt", saved.getCreatedAt());
+        
+        // 생성된 링크 조회
+        List<GuidelineLink> links = guidelineLinkRepository.findByGuidelineId(saved.getId());
+        List<GuidelineLinkRequest> linkDtos = links.stream()
+            .map(link -> new GuidelineLinkRequest(link.getTitle(), link.getUrl()))
+            .toList();
+        response.put("links", linkDtos);
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * 가이드라인 목록 조회
+     */
+    @Operation(summary = "가이드라인 목록 조회", description = "ADMIN 전용: 모든 가이드라인 목록 조회")
+    @GetMapping("/guidelines")
+    public ResponseEntity<List<Map<String, Object>>> getAllGuidelines() {
+        List<Guideline> guidelines = guidelineRepository.findAll();
+        List<Map<String, Object>> responses = new ArrayList<>();
+        
+        for (Guideline guideline : guidelines) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", guideline.getId());
+            response.put("title", guideline.getTitle());
+            response.put("importanceLevel", guideline.getImportanceLevel());
+            response.put("whyDangerous", guideline.getWhyDangerous());
+            response.put("whatHappens", guideline.getWhatHappens());
+            response.put("checkCriteria", guideline.getCheckStandard());
+            response.put("createdAt", guideline.getCreatedAt());
+            responses.add(response);
+        }
+        
+        return ResponseEntity.ok(responses);
+    }
+    
+    /**
+     * 개별 가이드라인 조회
+     */
+    @Operation(summary = "가이드라인 조회", description = "ADMIN 전용: 개별 가이드라인 상세 조회")
+    @GetMapping("/guidelines/{id}")
+    public ResponseEntity<Map<String, Object>> getGuideline(@PathVariable Long id) {
+        Guideline guideline = guidelineRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("가이드라인을 찾을 수 없습니다"));
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", guideline.getId());
+        response.put("title", guideline.getTitle());
+        response.put("cloudProviderId", guideline.getCloudProvider().getId());
+        response.put("serviceListId", guideline.getServiceList().getId());
+        response.put("importanceLevel", guideline.getImportanceLevel());
+        response.put("whyDangerous", guideline.getWhyDangerous());
+        response.put("whatHappens", guideline.getWhatHappens());
+        response.put("checkStandard", guideline.getCheckStandard());
+        response.put("solutionText", guideline.getSolutionText());
+        response.put("sideEffects", guideline.getSideEffects());
+        response.put("note", guideline.getNote());
+        response.put("createdAt", guideline.getCreatedAt());
+        
+        // 링크 조회
+        List<GuidelineLink> links = guidelineLinkRepository.findByGuidelineId(id);
+        List<GuidelineLinkRequest> linkDtos = links.stream()
+            .map(link -> new GuidelineLinkRequest(link.getTitle(), link.getUrl()))
+            .toList();
+        response.put("links", linkDtos);
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * 가이드라인 수정
+     */
+    @Operation(summary = "가이드라인 수정", description = "ADMIN 전용: 가이드라인 수정")
+    @PutMapping("/guidelines/{id}")
+    public ResponseEntity<Map<String, Object>> updateGuideline(@PathVariable Long id,
+                                                   @RequestBody GuidelineRequest request,
+                                                   Authentication authentication) {
+        Guideline guideline = guidelineRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("가이드라인을 찾을 수 없습니다"));
+        
+        CloudProvider provider = cloudProviderRepository.findById(request.getCloudProviderId())
+            .orElseThrow(() -> new RuntimeException("클라우드 제공업체를 찾을 수 없습니다"));
+        
+        ServiceList serviceList = serviceListRepository.findById(request.getServiceListId())
+            .orElseThrow(() -> new RuntimeException("서비스를 찾을 수 없습니다"));
+        
+        guideline.setTitle(request.getTitle());
+        guideline.setCloudProvider(provider);
+        guideline.setServiceList(serviceList);
+        guideline.setImportanceLevel(request.getImportanceLevel());
+        guideline.setWhyDangerous(request.getWhyDangerous());
+        guideline.setWhatHappens(request.getWhatHappens());
+        guideline.setCheckStandard(request.getCheckStandard());
+        guideline.setSolutionText(request.getSolutionText());
+        guideline.setSideEffects(request.getSideEffects());
+        guideline.setNote(request.getNote());
+        
+        Guideline updated = guidelineRepository.save(guideline);
+        
+        // 기존 링크 삭제 후 새 링크 추가
+        guidelineLinkRepository.deleteByGuidelineId(id);
+        if (request.getLinks() != null && !request.getLinks().isEmpty()) {
+            for (GuidelineLinkRequest linkDto : request.getLinks()) {
+                if (linkDto.getUrl() != null && !linkDto.getUrl().trim().isEmpty()) {
+                    GuidelineLink link = new GuidelineLink();
+                    link.setGuideline(updated);
+                    link.setTitle(linkDto.getTitle());
+                    link.setUrl(linkDto.getUrl().trim());
+                    guidelineLinkRepository.save(link);
+                }
+            }
+        }
+        
+        log.info("가이드라인 수정 성공: {}", updated.getTitle());
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", updated.getId());
+        response.put("title", updated.getTitle());
+        response.put("cloudProviderId", updated.getCloudProvider().getId());
+        response.put("serviceListId", updated.getServiceList().getId());
+        response.put("importanceLevel", updated.getImportanceLevel());
+        response.put("whyDangerous", updated.getWhyDangerous());
+        response.put("whatHappens", updated.getWhatHappens());
+        response.put("checkStandard", updated.getCheckStandard());
+        response.put("solutionText", updated.getSolutionText());
+        response.put("sideEffects", updated.getSideEffects());
+        response.put("note", updated.getNote());
+        
+        // 업데이트된 링크 조회
+        List<GuidelineLink> links = guidelineLinkRepository.findByGuidelineId(id);
+        List<GuidelineLinkRequest> linkDtos = links.stream()
+            .map(link -> new GuidelineLinkRequest(link.getTitle(), link.getUrl()))
+            .toList();
+        response.put("links", linkDtos);
         
         return ResponseEntity.ok(response);
     }
@@ -224,5 +369,71 @@ public class AdminController {
         result.put("externalId", user.getExternalId());
         result.put("username", user.getUsername());
         return ResponseEntity.ok(result);
+    }
+    
+    /**
+     * 체크리스트 생성
+     */
+    @Operation(summary = "체크리스트 생성", description = "ADMIN 전용: 체크리스트 항목 생성")
+    @PostMapping("/checklists")
+    public ResponseEntity<ChecklistResponse> createChecklist(@RequestBody ChecklistRequest request,
+                                                   Authentication authentication) {
+        CloudProvider provider = cloudProviderRepository.findById(request.getCloudProviderId())
+            .orElseThrow(() -> new RuntimeException("클라우드 제공업체를 찾을 수 없습니다"));
+        
+        ServiceList serviceList = serviceListRepository.findById(request.getServiceListId())
+            .orElseThrow(() -> new RuntimeException("서비스를 찾을 수 없습니다"));
+        
+        Guideline guideline = guidelineRepository.findById(request.getGuidelineId())
+            .orElseThrow(() -> new RuntimeException("가이드라인을 찾을 수 없습니다"));
+        
+        User admin = userRepository.findByUsername(authentication.getName())
+            .orElseThrow(() -> new RuntimeException("관리자를 찾을 수 없습니다"));
+        
+        Checklist checklist = new Checklist();
+        checklist.setCloudProvider(provider);
+        checklist.setServiceList(serviceList);
+        checklist.setGuideline(guideline);
+        checklist.setTitle(request.getTitle());
+        checklist.setIsActive(request.getIsActive());
+        checklist.setCreatedBy(admin);
+        
+        Checklist saved = checklistRepository.save(checklist);
+        return ResponseEntity.ok(ChecklistResponse.from(saved));
+    }
+    
+    /**
+     * 체크리스트 목록 조회
+     */
+    @Operation(summary = "체크리스트 목록", description = "ADMIN 전용: 체크리스트 목록 조회")
+    @GetMapping("/checklists")
+    public ResponseEntity<List<ChecklistResponse>> getAllChecklists() {
+        List<Checklist> checklists = checklistRepository.findAllActiveOrderedByProviderServiceGuideline();
+        List<ChecklistResponse> responses = checklists.stream()
+            .map(ChecklistResponse::from)
+            .toList();
+        return ResponseEntity.ok(responses);
+    }
+    
+    /**
+     * 개별 체크리스트 수정
+     */
+    @Operation(summary = "체크리스트 수정", description = "ADMIN 전용: 개별 체크리스트 수정")
+    @GetMapping("/checklists/{id}")
+    public ResponseEntity<ChecklistResponse> updateChecklist(@PathVariable Long id) {
+        Checklist checklist = checklistRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("체크리스트를 찾을 수 없습니다"));
+        return ResponseEntity.ok(ChecklistResponse.from(checklist));
+    }
+
+
+    /**
+     * 체크리스트 삭제
+     */
+    @Operation(summary = "체크리스트 삭제", description = "ADMIN 전용: 체크리스트 삭제")
+    @DeleteMapping("/checklists/{id}")
+    public ResponseEntity<Void> deleteChecklist(@PathVariable Long id) {
+        checklistRepository.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 }

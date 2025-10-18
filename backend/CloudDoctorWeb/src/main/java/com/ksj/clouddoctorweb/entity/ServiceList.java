@@ -31,9 +31,12 @@ public class ServiceList {
     
     @Column(nullable = false, length = 100)
     private String name;
-    
+
     @Column(name = "display_name", nullable = false, length = 100)
     private String displayName;
+    
+    @Column(name = "service_real_case_count", nullable = false, columnDefinition = "INT DEFAULT 0")
+    private Integer serviceRealCaseCount = 0;
     
     @Column(name = "is_active")
     private Boolean isActive = true;
