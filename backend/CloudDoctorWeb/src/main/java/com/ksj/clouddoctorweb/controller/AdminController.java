@@ -142,7 +142,7 @@ public class AdminController {
      */
     @Operation(summary = "가이드라인 생성", description = "ADMIN 전용: 보안 가이드라인 생성")
     @PostMapping("/guidelines")
-    public ResponseEntity<Guideline> createGuideline(@RequestBody GuidelineRequest request,
+    public ResponseEntity<Map<String, Object>> createGuideline(@RequestBody GuidelineRequest request,
                                                    Authentication authentication) {
         log.info("가이드라인 생성 요청: title={}", request.getTitle());
         
@@ -160,7 +160,7 @@ public class AdminController {
         guideline.setCloudProvider(provider);
         guideline.setServiceList(serviceList);
         // 한글 중요도 직접 저장 (DB constraint에 맞춤)
-        guideline.setImportanceLevelString(request.getImportanceLevel());
+        guideline.setImportanceLevel(request.getImportanceLevel());
         guideline.setWhyDangerous(request.getWhyDangerous());
         guideline.setWhatHappens(request.getWhatHappens());
         guideline.setCheckStandard(request.getCheckStandard());
@@ -184,7 +184,20 @@ public class AdminController {
         }
         
         log.info("가이드라인 생성 성공: {}", saved.getTitle());
-        return ResponseEntity.ok(saved);
+        
+        // 프록시 객체 직렬화 오류 방지를 위해 DTO 사용
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", saved.getId());
+        response.put("title", saved.getTitle());
+        response.put("cloudProviderId", saved.getCloudProvider().getId());
+        response.put("serviceListId", saved.getServiceList().getId());
+        response.put("importanceLevel", saved.getImportanceLevel());
+        response.put("whyDangerous", saved.getWhyDangerous());
+        response.put("whatHappens", saved.getWhatHappens());
+        response.put("checkStandard", saved.getCheckStandard());
+        response.put("createdAt", saved.getCreatedAt());
+        
+        return ResponseEntity.ok(response);
     }
     
     /**

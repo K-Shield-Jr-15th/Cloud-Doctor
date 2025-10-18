@@ -14,6 +14,8 @@ export const adminApi = {
       sessionStorage.setItem('username', data.username);
       sessionStorage.setItem('role', data.role);
       
+
+      
       // 사용자 정보 가져와서 fullName 저장
       const userInfo = await axios.get('/api/user/me');
       sessionStorage.setItem('fullName', userInfo.data.fullName);
@@ -62,6 +64,8 @@ export const adminApi = {
       sessionStorage.removeItem('username');
       sessionStorage.removeItem('role');
       sessionStorage.removeItem('fullName');
+
+
     }
   },
 

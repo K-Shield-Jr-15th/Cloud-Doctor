@@ -34,10 +34,10 @@ public class JwtServiceImpl implements JwtService {
     @Value("${jwt.secret:cloudDoctorSecretKeyForJwtTokenGeneration2024}")
     private String jwtSecret;
     
-    @Value("${jwt.access-token-expiration:60000}") // 1분
+    @Value("${jwt.access-token-expiration}") // 5분
     private long accessTokenExpiration;
     
-    @Value("${jwt.refresh-token-expiration:120000}") // 2분
+    @Value("${jwt.refresh-token-expiration}") // 2시간
     private long refreshTokenExpiration;
     
     private SecretKey getSigningKey() {
@@ -143,12 +143,17 @@ public class JwtServiceImpl implements JwtService {
     
     @Override
     public void storeAccessToken(String username, String token) {
-        redisTemplate.opsForValue().set(
-            "access_token:" + username, 
-            token, 
-            accessTokenExpiration, 
-            TimeUnit.MILLISECONDS
-        );
+        try {
+            redisTemplate.opsForValue().set(
+                "access_token:" + username, 
+                token, 
+                accessTokenExpiration, 
+                TimeUnit.MILLISECONDS
+            );
+            log.info("Redis에 액세스 토큰 저장 성공: {}", username);
+        } catch (Exception e) {
+            log.error("Redis 토큰 저장 실패: {}, 오류: {}", username, e.getMessage());
+        }
     }
     
     @Override
@@ -205,6 +210,13 @@ public class JwtServiceImpl implements JwtService {
                 refreshTokenRepository.deleteByUserId(refreshToken.getUser().getId());
                 log.info("Refresh Token DB에서 삭제: {}", refreshToken.getUser().getUsername());
             });
+    }
+    
+    @Override
+    @Transactional
+    public void removeAllRefreshTokensByUsername(String username) {
+        refreshTokenRepository.deleteByUserUsername(username);
+        log.info("사용자 모든 Refresh Token DB에서 삭제: {}", username);
     }
     
     private <T> T extractClaim(String token, java.util.function.Function<Claims, T> claimsResolver) {

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:9090';
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -32,6 +32,8 @@ axiosInstance.interceptors.response.use(
         sessionStorage.removeItem('role');
         sessionStorage.removeItem('fullName');
         
+
+        
         alert('로그인 세션이 만료되었습니다. 다시 로그인해주세요.');
         
         if (window.location.pathname.startsWith('/admin')) {
@@ -62,6 +64,8 @@ axiosInstance.interceptors.response.use(
           sessionStorage.removeItem('username');
           sessionStorage.removeItem('role');
           sessionStorage.removeItem('fullName');
+          
+
           
           alert('로그인 세션이 만료되었습니다. 다시 로그인해주세요.');
           

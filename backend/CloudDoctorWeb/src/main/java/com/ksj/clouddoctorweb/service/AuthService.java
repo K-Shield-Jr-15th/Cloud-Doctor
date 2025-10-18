@@ -26,6 +26,16 @@ public interface AuthService {
     void logout(String refreshToken);
     
     /**
+     * 사용자별 모든 토큰 삭제
+     */
+    void logoutAllTokensByUsername(String username);
+    
+    /**
+     * Redis에서 Access Token 삭제
+     */
+    void removeAccessToken(String username);
+    
+    /**
      * 토큰 갱신
      */
     TokenResponse refreshToken(String refreshToken, String userAgent);

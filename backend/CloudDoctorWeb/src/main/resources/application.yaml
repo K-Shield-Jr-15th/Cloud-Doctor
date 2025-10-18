@@ -14,6 +14,15 @@ spring:
       host: ${REDIS_HOST}
       password: ${REDIS_PASSWORD}
 
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+    time-zone: Asia/Seoul
+    date-format: yyyy-MM-dd HH:mm:ss
+    default-property-inclusion: non_null
+
 server:
   port: 9090
 
@@ -34,4 +43,4 @@ jwt:
   refresh-token-expiration: ${REFRESH_TOKEN_EXPIRATION}   # 120000 = 2분 (밀리초)
 
 cookie:
-  secure: ${COOKIE_SECURE:false}  # 로컬(HTTP): false, 터널(HTTPS): true
+  secure: ${COOKIE_SECURE}  # 환경별 설정

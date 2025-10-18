@@ -1,5 +1,6 @@
 package com.ksj.clouddoctorweb.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -21,6 +22,7 @@ import java.util.List;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Guideline {
     
     @Id
@@ -80,9 +82,10 @@ public class Guideline {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
-    public void setImportanceLevelString(String level) {
-        this.importanceLevel = level;
-    }
+    // 사용하지 않는 메서드 제거
+    // public void setImportanceLevelString(String level) {
+    //     this.importanceLevel = level;
+    // }
     
     public enum ImportanceLevel {
         LOW, MEDIUM, HIGH, CRITICAL

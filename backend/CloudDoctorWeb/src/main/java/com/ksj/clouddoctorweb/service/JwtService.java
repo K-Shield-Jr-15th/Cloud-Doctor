@@ -51,4 +51,9 @@ public interface JwtService {
      * DB에서 리프레시 토큰 삭제
      */
     void removeRefreshToken(String username);
+    
+    /**
+     * DB에서 사용자의 모든 리프레시 토큰 삭제
+     */
+    void removeAllRefreshTokensByUsername(String username);
 }

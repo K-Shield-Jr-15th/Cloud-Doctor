@@ -83,6 +83,21 @@ public class AuthServiceImpl implements AuthService {
     }
     
     @Override
+    public void logoutAllTokensByUsername(String username) {
+        // Redis에서 Access Token 삭제
+        jwtService.removeAccessToken(username);
+        // DB에서 해당 사용자의 모든 Refresh Token 삭제
+        jwtService.removeAllRefreshTokensByUsername(username);
+        log.info("사용자 모든 토큰 삭제 완료: {}", username);
+    }
+    
+    @Override
+    public void removeAccessToken(String username) {
+        jwtService.removeAccessToken(username);
+        log.info("Redis Access Token 삭제 완료: {}", username);
+    }
+    
+    @Override
     public TokenResponse refreshToken(String refreshToken, String userAgent) {
         // 리프레시 토큰 DB + User-Agent 검증
         if (!jwtService.validateRefreshToken(refreshToken, userAgent)) {
