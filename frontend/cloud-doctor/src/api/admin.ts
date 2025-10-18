@@ -211,7 +211,7 @@ export const adminApi = {
   deleteAdminChecklist: async (id: string | number): Promise<void> => {
     await axios.delete(`/admin/checklists/${id}`);
   },
-};
+
   createGuideline: async (guidelineData: {
     title: string;
     cloudProviderId: number;
@@ -225,7 +225,7 @@ export const adminApi = {
     note?: string;
     links?: string[];
   }): Promise<void> => {
-    await axios.post('/admin/guidelines', guidelineData);
+    await axios.post("/admin/guidelines", guidelineData);
   },
 
   getGuideline: async (id: number): Promise<any> => {
@@ -233,19 +233,22 @@ export const adminApi = {
     return data;
   },
 
-  updateGuideline: async (id: number, guidelineData: {
-    title: string;
-    cloudProviderId: number;
-    serviceListId: number;
-    importanceLevel: string;
-    whyDangerous: string;
-    whatHappens: string;
-    checkStandard: string;
-    solutionText?: string;
-    sideEffects?: string;
-    note?: string;
-    links?: string[];
-  }): Promise<void> => {
+  updateGuideline: async (
+    id: number,
+    guidelineData: {
+      title: string;
+      cloudProviderId: number;
+      serviceListId: number;
+      importanceLevel: string;
+      whyDangerous: string;
+      whatHappens: string;
+      checkStandard: string;
+      solutionText?: string;
+      sideEffects?: string;
+      note?: string;
+      links?: string[];
+    }
+  ): Promise<void> => {
     await axios.put(`/admin/guidelines/${id}`, guidelineData);
-  }
+  },
 };
