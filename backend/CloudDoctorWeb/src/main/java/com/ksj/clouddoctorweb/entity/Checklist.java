@@ -1,5 +1,6 @@
 package com.ksj.clouddoctorweb.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -24,9 +25,20 @@ public class Checklist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cloud_provider_id", nullable = false)
+    @JsonIgnore
+    private CloudProvider cloudProvider;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_list_id", nullable = false)
+    @JsonIgnore
+    private ServiceList serviceList;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "guideline_id", nullable = false)
+    @JsonIgnore
     private Guideline guideline;
     
     @Column(nullable = false, length = 200)
@@ -37,6 +49,7 @@ public class Checklist {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
+    @JsonIgnore
     private User createdBy;
     
     @CreatedDate

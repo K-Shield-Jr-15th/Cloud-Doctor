@@ -14,5 +14,5 @@ public class GuidelineRequest {
     private String solutionText;
     private String sideEffects;
     private String note;
-    private java.util.List<String> links;
+    private java.util.List<GuidelineLinkRequest> links;
 }

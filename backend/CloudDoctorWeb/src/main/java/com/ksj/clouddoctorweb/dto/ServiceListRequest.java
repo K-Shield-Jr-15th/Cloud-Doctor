@@ -10,5 +10,6 @@ public class ServiceListRequest {
     private Long cloudProviderId;
     private String name;
     private String displayName;
+    private Integer serviceRealCaseCount;
     private Boolean isActive = true;
 }

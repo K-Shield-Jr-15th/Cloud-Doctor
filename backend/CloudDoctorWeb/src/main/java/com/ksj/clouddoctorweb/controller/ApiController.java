@@ -1,6 +1,7 @@
 package com.ksj.clouddoctorweb.controller;
 
 import com.ksj.clouddoctorweb.dto.ServiceListResponse;
+import com.ksj.clouddoctorweb.dto.ChecklistResponse;
 import com.ksj.clouddoctorweb.entity.*;
 import com.ksj.clouddoctorweb.repository.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,5 +120,33 @@ public class ApiController {
         result.put("externalId", user.getExternalId());
         result.put("username", user.getUsername());
         return ResponseEntity.ok(result);
+    }
+    
+    /**
+     * 체크리스트 전체 조회 (사용자용)
+     */
+    @Operation(summary = "체크리스트 전체 조회", description = "사용자용: 모든 체크리스트 조회")
+    @GetMapping("/checklists")
+    public ResponseEntity<List<ChecklistResponse>> getAllChecklists() {
+        List<Checklist> checklists = checklistRepository.findAllActiveOrderedByProviderServiceGuideline();
+        List<ChecklistResponse> responses = checklists.stream()
+            .map(ChecklistResponse::from)
+            .toList();
+        return ResponseEntity.ok(responses);
+    }
+    
+    /**
+     * 특정 서비스의 체크리스트 조회
+     */
+    @Operation(summary = "서비스별 체크리스트 조회", description = "특정 서비스의 체크리스트 조회")
+    @GetMapping("/checklists/service/{providerId}/{serviceId}")
+    public ResponseEntity<List<ChecklistResponse>> getChecklistsByService(
+            @PathVariable Long providerId, 
+            @PathVariable Long serviceId) {
+        List<Checklist> checklists = checklistRepository.findByCloudProviderIdAndServiceListIdAndIsActiveTrue(providerId, serviceId);
+        List<ChecklistResponse> responses = checklists.stream()
+            .map(ChecklistResponse::from)
+            .toList();
+        return ResponseEntity.ok(responses);
     }
 }

@@ -8,6 +8,7 @@ public class ServiceListResponse {
     private Long id;
     private String name;
     private String displayName;
+    private Integer serviceRealCaseCount;
     private Boolean isActive;
     private CloudProviderDto cloudProvider;
     
@@ -23,6 +24,7 @@ public class ServiceListResponse {
         response.setId(serviceList.getId());
         response.setName(serviceList.getName());
         response.setDisplayName(serviceList.getDisplayName());
+        response.setServiceRealCaseCount(serviceList.getServiceRealCaseCount());
         response.setIsActive(serviceList.getIsActive());
         
         CloudProviderDto providerDto = new CloudProviderDto();
@@ -33,4 +35,5 @@ public class ServiceListResponse {
         
         return response;
     }
+    
 }
