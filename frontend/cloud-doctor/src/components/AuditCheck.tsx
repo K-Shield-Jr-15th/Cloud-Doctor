@@ -1,14 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { auditApi, AuditResponse, AVAILABLE_CHECKS } from "../api/audit";
+import { userApi } from "../api/user";
 
 export default function AuditCheck() {
   const [accountId, setAccountId] = useState("");
   const [roleName, setRoleName] = useState("CloudDoctorAuditRole");
   const [externalId, setExternalId] = useState("");
+  const [maskedExternalId, setMaskedExternalId] = useState("");
   const [selectedChecks, setSelectedChecks] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AuditResponse | null>(null);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const userInfo = await userApi.getMe();
+        if (userInfo.externalId) {
+          setExternalId(userInfo.externalId);
+          setMaskedExternalId("*".repeat(userInfo.externalId.length));
+        }
+      } catch (err) {
+        console.error("사용자 정보 로드 실패:", err);
+      }
+    };
+    fetchUserInfo();
+  }, []);
 
   const handleCheckToggle = (checkId: string) => {
     setSelectedChecks((prev) =>
@@ -76,14 +93,14 @@ export default function AuditCheck() {
 
             <div>
               <label className="block text-beige mb-2">
-                External ID (선택)
+                External ID (자동 입력됨)
               </label>
               <input
                 type="text"
-                value={externalId}
-                onChange={(e) => setExternalId(e.target.value)}
-                placeholder="unique-external-id"
-                className="w-full px-4 py-2 rounded bg-white/20 text-white placeholder-white/50"
+                value={maskedExternalId}
+                readOnly
+                placeholder="로그인 후 자동 입력"
+                className="w-full px-4 py-2 rounded bg-white/10 text-white placeholder-white/50 cursor-not-allowed"
               />
             </div>
 
@@ -149,13 +166,13 @@ export default function AuditCheck() {
                   <div className="text-2xl font-bold text-green-400">
                     {result.summary.pass}
                   </div>
-                  <div className="text-sm text-beige">통과</div>
+                  <div className="text-sm text-beige">양호</div>
                 </div>
                 <div className="bg-red-500/20 p-4 rounded text-center">
                   <div className="text-2xl font-bold text-red-400">
                     {result.summary.fail}
                   </div>
-                  <div className="text-sm text-beige">실패</div>
+                  <div className="text-sm text-beige">취약</div>
                 </div>
                 <div className="bg-yellow-500/20 p-4 rounded text-center">
                   <div className="text-2xl font-bold text-yellow-400">
@@ -191,24 +208,7 @@ export default function AuditCheck() {
                         <div className="font-bold text-white">
                           {item.check_id}
                         </div>
-                        <div className="text-sm text-beige mt-1">
-                          {item.message.split('|').map((part, i) => {
-                            const urlMatch = part.match(/(https?:\/\/[^\s]+|www\.[^\s]+)/);
-                            if (urlMatch) {
-                              const url = urlMatch[0].startsWith('http') ? urlMatch[0] : `https://${urlMatch[0]}`;
-                              return (
-                                <div key={i}>
-                                  {part.substring(0, urlMatch.index)}
-                                  <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">
-                                    {urlMatch[0]}
-                                  </a>
-                                  {part.substring(urlMatch.index + urlMatch[0].length)}
-                                </div>
-                              );
-                            }
-                            return <div key={i}>{part}</div>;
-                          })}
-                        </div>
+                        <div className="text-sm text-beige mt-1"></div>
                         <div className="text-xs text-white/70 mt-1">
                           Resource: {item.resource_id}
                         </div>
@@ -239,8 +239,6 @@ export default function AuditCheck() {
                 ))}
               </div>
             )}
-
-           
           </div>
         )}
       </div>

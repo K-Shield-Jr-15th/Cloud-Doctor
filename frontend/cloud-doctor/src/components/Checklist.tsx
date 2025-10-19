@@ -66,10 +66,21 @@ export default function Checklist() {
   );
 
   const totalItems = filteredChecklist.length;
-  const scorePerItem = totalItems > 0 ? 10 / totalItems : 0;
-  const totalScore = filteredChecklist.reduce((score, item) => {
-    return answers[item.id] === true ? score + scorePerItem : score;
-  }, 0);
+  const passCount = filteredChecklist.filter(
+    (item) => answers[item.id] === true
+  ).length;
+  const passRate = totalItems > 0 ? passCount / totalItems : 0;
+
+  let status = "Critical";
+  let statusColor = "from-red-600 to-red-700";
+  if (passRate >= 2 / 3) {
+    status = "Nice";
+    statusColor = "from-green-600 to-green-700";
+  } else if (passRate >= 1 / 3) {
+    status = "Warning";
+    statusColor = "from-yellow-500 to-yellow-600";
+  }
+
   const completedItems = filteredChecklist.filter(
     (item) => answers[item.id] !== undefined
   ).length;
@@ -117,7 +128,7 @@ export default function Checklist() {
         {/* Select All / Clear */}
         <div className="flex gap-2 mb-6">
           <button
-            className="px-5 py-2 rounded-xl bg-gradient-to-r from-green-400 to-green-500 text-white font-medium hover:from-green-600 hover:to-green-600 shadow-lg transition-all"
+            className="px-5 py-2 rounded-xl bg-primary-dark text-primary-light font-medium hover:bg-primary border border-primary shadow-lg transition-all"
             onClick={() => {
               setSelectedServices(services);
               setAnswers({});
@@ -126,7 +137,7 @@ export default function Checklist() {
             Select All
           </button>
           <button
-            className="px-5 py-2 rounded-xl bg-gradient-to-r from-red-600 to-red-700 text-white font-medium hover:from-red-700 hover:to-red-800 shadow-lg transition-all"
+            className="px-5 py-2 rounded-xl bg-primary-light text-primary-dark font-medium hover:bg-surface shadow-lg transition-all"
             onClick={() => {
               setSelectedServices([]);
               setAnswers({});
@@ -136,20 +147,22 @@ export default function Checklist() {
           </button>
         </div>
         {/* 총점 - 고정 */}
-        <div className="sticky top-20 z-10 mb-8 p-6 bg-gradient-to-r from-primary to-accent rounded-2xl shadow-2xl">
+        <div
+          className={`sticky top-20 z-10 mb-8 p-6 bg-gradient-to-r ${statusColor} rounded-2xl shadow-2xl`}
+        >
           <div className="flex items-center justify-between text-white">
             <div>
-              <p className="text-sm opacity-90">현재 점수</p>
-              <p className="text-5xl font-bold">
-                {totalScore.toFixed(1)}
-                <span className="text-2xl">/10</span>
-              </p>
+              <p className="text-sm opacity-90">보안 상태</p>
+              <p className="text-5xl font-bold">{status}</p>
             </div>
             <div className="flex items-center gap-3">
               <div className="text-right">
                 <p className="text-sm opacity-90">진행률</p>
                 <p className="text-3xl font-bold">
                   {completionRate.toFixed(0)}%
+                </p>
+                <p className="text-sm opacity-75 mt-1">
+                  {passCount}/{totalItems} 항목 양호
                 </p>
               </div>
               <button

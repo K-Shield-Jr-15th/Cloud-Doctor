@@ -54,7 +54,9 @@ function Index() {
                     <img
                       className="w-24 h-24 rounded-lg object-cover"
                       alt=""
-                      src={`/img/aws-icon/${service.displayName || service.name}.svg`}
+                      src={`/img/aws-icon/${
+                        service.displayName || service.name
+                      }.svg`}
                     />
                     <div>
                       <h3 className="text-xl font-bold text-beige mb-2">
@@ -62,9 +64,6 @@ function Index() {
                       </h3>
                       <p className="text-sm text-slate-400">
                         총 {service.guidelineCount}개 항목
-                      </p>
-                      <p className="text-sm text-slate-400">
-                        사고사례 및 공격기법 {service.serviceRealCaseCount}건
                       </p>
                     </div>
                   </div>

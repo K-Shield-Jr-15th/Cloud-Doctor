@@ -1,5 +1,9 @@
-import Login from '../Login';
+import Login from "../Login";
 
 export default function AdminLogin() {
-  return <Login showRegister={false} />;
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <Login showRegister={false} />
+    </div>
+  );
 }
