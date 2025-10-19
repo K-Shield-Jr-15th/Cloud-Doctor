@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { auditApi, AuditResponse, AVAILABLE_CHECKS } from "../api/audit";
+import { auditApi, AuditResponse, AVAILABLE_CHECKS, S3_CHECKS } from "../api/audit";
 
 export default function AuditCheck() {
   const [accountId, setAccountId] = useState("");

@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Dict, List
 from app.core.aws_client import AWSClientManager
 from app.checks.iam_checks import IAMAccessKeyAgeCheck, IAMRootAccessKeyCheck, IAMRootMFACheck
-from app.checks.s3_checks import S3PublicAccessCheck, S3EncryptionCheck
+from app.checks.s3_checks import S3BucketPolicyCheck, S3PublicAccessCheck, S3ReplicationRoleCheck, S3EncryptionCheck
 from app.checks.ec2_checks import EC2IMDSv2Check, EC2PublicIPCheck, EC2AMIPrivateCheck, EBSSnapshotPrivateCheck
 
 class AuditService:
@@ -15,7 +15,9 @@ class AuditService:
             'iam_access_key_age': IAMAccessKeyAgeCheck,
             'iam_root_access_key': IAMRootAccessKeyCheck,
             'iam_root_mfa': IAMRootMFACheck,
+            's3_bucket_policy': S3BucketPolicyCheck,
             's3_public_access': S3PublicAccessCheck,
+            's3_replication_role': S3ReplicationRoleCheck,
             's3_encryption': S3EncryptionCheck,
             'ec2_imdsv2': EC2IMDSv2Check,
             'ec2_public_ip': EC2PublicIPCheck,

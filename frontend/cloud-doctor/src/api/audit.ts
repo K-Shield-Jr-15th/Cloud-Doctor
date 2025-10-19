@@ -9,6 +9,12 @@ export interface AuditRequest {
   checks?: string[];
 }
 
+export interface AvailableChecks {
+  [category: string]: {
+    [checkId: string]: string;
+  };
+}
+
 export interface CheckResult {
   check_id: string;
   status: string;
@@ -56,6 +62,11 @@ export const auditApi = {
     const { data } = await axios.get(`${AUDIT_API_URL}/health`);
     return data;
   },
+
+  getAvailableChecks: async (): Promise<Record<string, Record<string, string>>> => {
+    const { data } = await axios.get(`${AUDIT_API_URL}/api/audit/checks`);
+    return data;
+  },
 };
 
 export const AVAILABLE_CHECKS = [
@@ -66,10 +77,20 @@ export const AVAILABLE_CHECKS = [
   },
   { id: "iam_root_access_key", name: "루트 계정 액세스 키", category: "IAM" },
   { id: "iam_root_mfa", name: "루트 계정 MFA", category: "IAM" },
-  { id: "s3_public_access", name: "S3 퍼블릭 액세스 차단", category: "S3" },
+  { id: "s3_bucket_policy", name: "S3 버킷 정책 공개 설정", category: "S3" },
+  { id: "s3_public_access", name: "S3 버킷 공개 ACL", category: "S3" },
+  { id: "s3_replication_role", name: "S3 복제 규칙 IAM 역할", category: "S3" },
   { id: "s3_encryption", name: "S3 암호화 설정", category: "S3" },
   { id: "ec2_imdsv2", name: "EC2 IMDSv2 강제", category: "EC2" },
   { id: "ec2_public_ip", name: "EC2 퍼블릭 IP", category: "EC2" },
   { id: "ec2_ami_private", name: "EC2 AMI 프라이빗 설정", category: "EC2" },
   { id: "ebs_snapshot_private", name: "EBS 스냅샷 프라이빗 설정", category: "EC2" },
+];
+
+// S3 전용 체크 목록
+export const S3_CHECKS = [
+  "s3_bucket_policy",
+  "s3_public_access", 
+  "s3_replication_role",
+  "s3_encryption"
 ];
