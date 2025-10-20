@@ -32,6 +32,25 @@ const Header: React.FC = () => {
             <ul className="flex gap-6">
               <li>
                 <Link
+                  to="/about"
+                  className={`relative py-2 px-1 transition-all duration-300 group ${
+                    location.pathname === "/about"
+                      ? "text-rose-400"
+                      : "text-slate-300 hover:text-rose-400"
+                  }`}
+                >
+                  개요
+                  <span
+                    className={`absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-rose-500 to-pink-600 transform transition-transform duration-300 ${
+                      location.pathname === "/about"
+                        ? "scale-x-100"
+                        : "scale-x-0 group-hover:scale-x-100"
+                    }`}
+                  ></span>
+                </Link>
+              </li>
+              <li>
+                <Link
                   to="/guide"
                   className={`relative py-2 px-1 transition-all duration-300 group ${
                     location.pathname === "/guide"
@@ -166,6 +185,15 @@ const Header: React.FC = () => {
         <div className="md:hidden bg-slate-800 border-t border-slate-700 shadow-lg">
           <nav className="px-6 py-4">
             <ul className="space-y-4">
+              <li>
+                <Link
+                  to="/about"
+                  className="block text-rose-400 hover:text-rose-300 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  개요
+                </Link>
+              </li>
               <li>
                 <Link
                   to="/guide"

@@ -37,15 +37,56 @@ infraaudit/
 
 ## 설치 및 실행
 
+### 1. 가상환경 생성 및 활성화
+
 ```bash
 cd infraaudit
 python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-# .env 파일 수정
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+source venv/bin/activate  # macOS/Linux
+# 또는
+venv\Scripts\activate  # Windows
 ```
+
+### 2. 의존성 설치
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. 환경 변수 설정 (선택사항)
+
+```bash
+cp .env.example .env
+# .env 파일 수정 (필요시)
+```
+
+### 4. 서버 실행
+
+```bash
+# 개발 모드 (자동 재시작)
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+# 프로덕션 모드
+uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
+```
+
+### 5. HTTPS 실행 (로컬 개발용)
+
+```bash
+# mkcert로 인증서 생성 (최초 1회)
+mkcert -install
+mkcert localhost 127.0.0.1 ::1
+
+# HTTPS로 실행
+uvicorn main:app --reload --host 0.0.0.0 --port 8000 \
+  --ssl-keyfile=./localhost-key.pem \
+  --ssl-certfile=./localhost.pem
+```
+
+### 6. 접속 확인
+
+- API 문서: http://localhost:8000/docs
+- Health Check: http://localhost:8000/health
 
 ## API 엔드포인트
 

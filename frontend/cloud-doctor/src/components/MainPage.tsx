@@ -89,8 +89,12 @@ export default function MainPage() {
         setCurrentSection((prev) => prev + 1);
       } else if (e.key === "ArrowUp" && currentSection > 0) {
         setCurrentSection((prev) => prev - 1);
-      } else if (e.key === "Enter" && sections[currentSection].route) {
-        navigate(sections[currentSection].route!);
+      } else if (e.key === "Enter") {
+        if (currentSection === 0) {
+          navigate("/about");
+        } else if (sections[currentSection].route) {
+          navigate(sections[currentSection].route!);
+        }
       }
     };
 
@@ -170,7 +174,9 @@ export default function MainPage() {
   }, [showIntro]);
 
   const handleSectionClick = () => {
-    if (sections[currentSection].route) {
+    if (currentSection === 0) {
+      navigate("/about");
+    } else if (sections[currentSection].route) {
       navigate(sections[currentSection].route!);
     }
   };

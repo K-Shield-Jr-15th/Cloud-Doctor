@@ -17,6 +17,7 @@ import Prowler from "./components/Prowler";
 import Login from "./components/Login";
 import MyPage from "./components/MyPage";
 import AuditCheck from "./components/AuditCheck";
+import About from "./components/About";
 
 function AppContent() {
   const [showDemoModal, setShowDemoModal] = useState(false);
@@ -88,6 +89,7 @@ function AppContent() {
             />
             <Route path="/login" element={<Login />} />
             <Route path="/mypage" element={<MyPage />} />
+            <Route path="/about" element={<About />} />
             <Route path="/admin/*" element={<AdminPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

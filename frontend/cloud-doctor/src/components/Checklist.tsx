@@ -156,43 +156,50 @@ export default function Checklist() {
           </button>
         </div>
         {/* 총점 - 고정 */}
-        <div
-          className={`sticky top-20 z-10 mb-8 p-6 bg-gradient-to-r ${statusColor} rounded-2xl shadow-2xl`}
-        >
-          <div className="flex items-center justify-between text-white">
-            <div>
-              <p className="text-sm opacity-90">보안 상태</p>
-              <p className="text-5xl font-bold">{status}</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-sm opacity-90">진행률</p>
-                <p className="text-3xl font-bold">
-                  {completionRate.toFixed(0)}%
-                </p>
-                <p className="text-sm opacity-75 mt-1">
-                  {passCount}/{totalItems} 항목 양호
-                </p>
+        <div className="sticky top-20 z-10 mb-8 rounded-2xl shadow-2xl overflow-hidden relative">
+          {/* 기본 배경 (회색) */}
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-700 to-slate-800" />
+          {/* 진행률 배경 (상태 색상) */}
+          <div
+            className={`absolute inset-0 bg-gradient-to-r ${statusColor} transition-all duration-500`}
+            style={{ width: `${completionRate}%` }}
+          />
+          <div className="relative p-6">
+            <div className="flex items-center justify-between text-white">
+              <div>
+                <p className="text-sm opacity-90">보안 상태</p>
+                <p className="text-5xl font-bold">{status}</p>
               </div>
-              <button
-                onClick={resetAnswers}
-                className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-all hover:rotate-180 duration-500"
-                title="답변 초기화"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <p className="text-sm opacity-90">진행률</p>
+                  <p className="text-3xl font-bold">
+                    {completionRate.toFixed(0)}%
+                  </p>
+                  <p className="text-sm opacity-75 mt-1">
+                    {passCount}/{totalItems} 항목 양호
+                  </p>
+                </div>
+                <button
+                  onClick={resetAnswers}
+                  className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-all hover:rotate-180 duration-500"
+                  title="답변 초기화"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-              </button>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -227,7 +234,8 @@ export default function Checklist() {
                     <td className="border border-primary p-4 text-beige">
                       {item.title}
                     </td>
-                    <td className="border border-primary p-4 text-center flex justify-center gap-2">
+                    <td className="border border-primary p-4">
+                      <div className="flex justify-center gap-2">
                       {/* O 버튼 */}
                       <button
                         className={`w-10 h-10 rounded-lg font-bold text-lg transition-all ${
@@ -254,6 +262,7 @@ export default function Checklist() {
                       >
                         X
                       </button>
+                      </div>
                     </td>
                   </tr>
                 );
