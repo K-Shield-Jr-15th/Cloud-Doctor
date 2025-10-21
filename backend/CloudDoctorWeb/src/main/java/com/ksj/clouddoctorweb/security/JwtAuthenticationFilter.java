@@ -38,6 +38,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String requestURI = request.getRequestURI();
         log.info("JWT 필터 처리: {} {}", request.getMethod(), requestURI);
         
+        // /api/auth/ 경로는 JWT 검증 완전 제외
+        if (requestURI.startsWith("/api/auth/")) {
+            log.info("인증 불필요 경로, JWT 검증 건너뜀: {}", requestURI);
+            filterChain.doFilter(request, response);
+            return;
+        }
+        
         String jwt = null;
         final String userAgent = request.getHeader("User-Agent");
         
