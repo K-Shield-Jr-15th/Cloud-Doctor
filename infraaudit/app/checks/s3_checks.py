@@ -2,8 +2,8 @@ import json
 from .base_check import BaseCheck
 from typing import List, Dict
 
-class S3BucketPolicyPublicActionsCheck(BaseCheck):
-    """S3 버킷 정책의 공개 설정과 Get/Put 권한으로 인한 데이터 탈취/악성코드 주입 위협"""
+class S3PublicAccessAndPolicyCheck(BaseCheck):
+    """S3 퍼블릭 액세스 차단과 버킷 정책 종합 점검"""
     
     async def check(self) -> Dict:
         s3 = self.session.client('s3')
@@ -19,7 +19,27 @@ class S3BucketPolicyPublicActionsCheck(BaseCheck):
 
             for bucket in buckets['Buckets']:
                 bucket_name = bucket['Name']
+                bucket_data = {'bucket_name': bucket_name}
                 
+                # 점검 기준 1: 퍼블릭 액세스 차단 설정
+                public_access_blocked = False
+                try:
+                    response = s3.get_public_access_block(Bucket=bucket_name)
+                    config = response['PublicAccessBlockConfiguration']
+                    bucket_data['public_access_block'] = config
+                    
+                    public_access_blocked = (
+                        config.get('BlockPublicAcls', False) and
+                        config.get('IgnorePublicAcls', False) and
+                        config.get('BlockPublicPolicy', False) and
+                        config.get('RestrictPublicBuckets', False)
+                    )
+                except s3.exceptions.ClientError:
+                    bucket_data['public_access_block'] = None
+                    public_access_blocked = False
+                
+                # 점검 기준 2: 버킷 정책
+                policy_safe = True
                 try:
                     # ========== 1. 퍼블릭 액세스 차단 설정 확인 ==========
                     block_public_access_enabled = False
@@ -169,7 +189,7 @@ class S3BucketPolicyPublicActionsCheck(BaseCheck):
         except Exception as e:
             results.append(self.get_result('오류', 'N/A', f"S3 버킷 목록 조회 중 오류 발생: {str(e)}"))
         
-        return {'results': results, 'raw': raw, 'guideline_id': 7}
+        return {'results': results, 'raw': raw, 'guideline_id': 1}
 
 class S3BucketACLCheck(BaseCheck):
     """S3 버킷 ACL에 의한 외부 접근 허용 및 정보유출 위험 점검"""
@@ -214,6 +234,9 @@ class S3BucketACLCheck(BaseCheck):
                     # ACL 분석
                     owner_only = True  # 소유자만 권한이 있는지 확인
                     public_grants = []
+                    
+                    # 점검 기준 2: 외부 계정 권한 (12자리 숫자 계정 ID)
+                    has_external_access = False
                     external_grants = []
                     group_grants = []
 
@@ -298,8 +321,8 @@ class S3BucketACLCheck(BaseCheck):
                         status = '경고'
                         message = f"버킷 [{bucket_name}]의 ACL 구성을 확인할 수 없습니다."
                     
-                    results.append(self.get_result(status, bucket_name, message, details))
-
+                    results.append(self.get_result(status, bucket_name, message, bucket_data))
+                    
                 except s3.exceptions.ClientError as e:
                     error_code = e.response['Error']['Code']
                     raw.append({'bucket_name': bucket_name, 'acl': None, 'error': str(e)})
@@ -324,12 +347,15 @@ class S3BucketACLCheck(BaseCheck):
         except Exception as e:
             results.append(self.get_result('경고', 'N/A', f"S3 버킷 목록 조회 중 오류 발생: {str(e)}"))
         
-        return {'results': results, 'raw': raw, 'guideline_id': 8}
+        return {'results': results, 'raw': raw, 'guideline_id': 2}
 
+class S3ReplicationRuleCheck(BaseCheck):
+    """S3 복제 규칙 대상 버킷 점검"""
 class S3ReplicationRuleCheck(BaseCheck):
     """S3 복제 규칙 대상 버킷 점검"""
     
     async def check(self) -> Dict:
+        s3 = self.session.client('s3')
         s3 = self.session.client('s3')
         results = []
         raw = []
@@ -428,5 +454,7 @@ class S3EncryptionCheck(BaseCheck):
         return {'results': results, 'raw': [], 'guideline_id': 10}
 
 # 기존 클래스들과의 호환성을 위한 별칭
-S3BucketPolicyCheck = S3BucketPolicyPublicActionsCheck
-S3PublicAccessCheck = S3BucketACLCheck
+S3BucketPolicyPublicActionsCheck = S3PublicAccessAndPolicyCheck
+S3BucketPolicyCheck = S3PublicAccessAndPolicyCheck
+S3PublicAccessCheck = S3ACLCheck
+S3BucketACLCheck = S3ACLCheck

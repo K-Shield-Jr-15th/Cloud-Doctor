@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import List, Dict
 import json
 
-
 class SNSAccessPolicyCheck(BaseCheck):
     async def check(self) -> List[Dict]:
         sns = self.session.client('sns')
