@@ -1,6 +1,7 @@
 from .base_check import BaseCheck
 from datetime import datetime
 from typing import List, Dict
+import json
 
 class SQSAccessPolicyCheck(BaseCheck):
     async def check(self) -> List[Dict]:
@@ -81,7 +82,7 @@ class SQSAccessPolicyCheck(BaseCheck):
                     if vulnerable:
                         results.append(self.get_result(
                             '취약', queue_arn,
-                            f"큐 {queue_arn}의 액세스 정책에서 부적절한 Principal 설정이 발견되었습니다: {', '.join(issues)}",
+                            f"큐 {queue_arn}의 액세스 정책에서 부적절한 Principal 설정이 발견되었습니다: {', '.join(issues)}. 액세스 정책에서 Principal을 특정 계정/역할/서비스 ARN으로만 제한해야 합니다.",
                             {
                                 'policy': policy,
                                 'issues': issues
@@ -95,9 +96,9 @@ class SQSAccessPolicyCheck(BaseCheck):
                         ))
                         
                 except Exception as e:
-                    results.append(self.get_result('ERROR', queue_url, f"큐 {queue_url} 정책 확인 중 오류: {str(e)}"))
+                    results.append(self.get_result('오류', queue_url, f"큐 {queue_url} 정책 확인 중 오류: {str(e)}"))
                     
         except Exception as e:
-            results.append(self.get_result('ERROR', 'N/A', str(e)))
+            results.append(self.get_result('오류', 'N/A', str(e)))
         
         return {'results': results, 'raw': raw, 'guideline_id': 30}

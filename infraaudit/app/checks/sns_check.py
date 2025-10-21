@@ -1,6 +1,8 @@
 from .base_check import BaseCheck
 from datetime import datetime
 from typing import List, Dict
+import json
+
 
 class SNSAccessPolicyCheck(BaseCheck):
     async def check(self) -> List[Dict]:
@@ -69,7 +71,7 @@ class SNSAccessPolicyCheck(BaseCheck):
                     if vulnerable:
                         results.append(self.get_result(
                             '취약', topic_arn,
-                            f"주제 {topic_arn}의 액세스 정책에서 과도한 권한이 설정되어 있습니다: {', '.join(issues)}",
+                            f"주제 {topic_arn}의 액세스 정책에서 과도한 권한이 설정되어 있습니다: {', '.join(issues)}. SNS 주제 액세스 정책에서 sns:Publish, sns:Subscribe 등의 SNS 관련 권한을 Principal은 특정 계정/역할/사용자 ARN으로 고정하고, Resource는 해당 주제의 ARN으로 고정해야 합니다.",
                             {
                                 'policy': policy,
                                 'issues': issues
@@ -83,10 +85,10 @@ class SNSAccessPolicyCheck(BaseCheck):
                         ))
                         
                 except Exception as e:
-                    results.append(self.get_result('ERROR', topic_arn, f"주제 {topic_arn} 정책 확인 중 오류: {str(e)}"))
+                    results.append(self.get_result('오류', topic_arn, f"주제 {topic_arn} 정책 확인 중 오류: {str(e)}"))
                     
         except Exception as e:
-            results.append(self.get_result('ERROR', 'N/A', str(e)))
+            results.append(self.get_result('오류', 'N/A', str(e)))
         
         return {'results': results, 'raw': raw, 'guideline_id': 29} 
     

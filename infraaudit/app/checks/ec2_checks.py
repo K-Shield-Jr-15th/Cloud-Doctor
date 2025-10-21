@@ -13,7 +13,7 @@ class EC2IMDSv2Check(BaseCheck):
             
             if not instances['Reservations']:
                 results.append(self.get_result(
-                    'PASS', 'N/A',
+                    '양호', 'N/A',
                     "EC2 인스턴스가 존재하지 않습니다."
                 ))
                 return {'results': results, 'raw': raw, 'guideline_id': 1}
@@ -32,8 +32,8 @@ class EC2IMDSv2Check(BaseCheck):
                     
                     if http_tokens != 'required':
                         results.append(self.get_result(
-                            'FAIL', instance_id,
-                            f"인스턴스 {instance_id}는 IMDSv2가 Optional로 설정되어 있습니다.",
+                            '취약', instance_id,
+                            f"인스턴스 {instance_id}는 IMDSv2가 Optional로 설정되어 있습니다. EC2 인스턴스에서 IMDSv2를 필수로 설정해야 합니다.",
                             {
                                 'http_tokens': http_tokens,
                                 'http_put_response_hop_limit': metadata_options.get('HttpPutResponseHopLimit'),
@@ -43,7 +43,7 @@ class EC2IMDSv2Check(BaseCheck):
                         ))
                     else:
                         results.append(self.get_result(
-                            'PASS', instance_id,
+                            '양호', instance_id,
                             f"인스턴스 {instance_id}는 IMDSv2가 필수로 설정되어 있습니다.",
                             {
                                 'http_tokens': http_tokens,
@@ -53,55 +53,9 @@ class EC2IMDSv2Check(BaseCheck):
                             }
                         ))
         except Exception as e:
-            results.append(self.get_result('ERROR', 'N/A', str(e)))
+            results.append(self.get_result('오류', 'N/A', str(e)))
         
         return {'results': results, 'raw': raw , 'guideline_id' : 1}
-
-class EC2PublicIPCheck(BaseCheck):
-    async def check(self) -> List[Dict]:
-        ec2 = self.session.client('ec2')
-        results = []
-        raw = []
-        
-        try:
-            instances = ec2.describe_instances()
-            
-            if not instances['Reservations']:
-                results.append(self.get_result(
-                    'PASS', 'N/A',
-                    "EC2 인스턴스가 존재하지 않습니다."
-                ))
-                return {'results': results, 'raw': raw, 'guideline_id': 2}
-            
-            for reservation in instances['Reservations']:
-                for instance in reservation['Instances']:
-                    instance_id = instance['InstanceId']
-                    public_ip = instance.get('PublicIpAddress')
-                    
-                    raw.append({
-                        'instance_id': instance_id,
-                        'public_ip': public_ip,
-                        'instance_data': instance
-                    })
-                    
-                    if public_ip:
-                        results.append(self.get_result(
-                            'WARN', instance_id,
-                            f"인스턴스 {instance_id}에 공인 IP가 할당되어 있습니다.",
-                            {
-                                'public_ip': public_ip,
-                                'instance_id': instance_id
-                            }
-                        ))
-                    else:
-                        results.append(self.get_result(
-                            'PASS', instance_id,
-                            f"인스턴스 {instance_id}에 공인 IP가 할당되지 않았습니다."
-                        ))
-        except Exception as e:
-            results.append(self.get_result('ERROR', 'N/A', str(e)))
-        
-        return {'results': results, 'raw': raw, 'guideline_id': 2}
 
 class EC2AMIPrivateCheck(BaseCheck):
     async def check(self) -> List[Dict]:
@@ -110,13 +64,11 @@ class EC2AMIPrivateCheck(BaseCheck):
         raw = []
         
         try:
-            # 모든 AMI 조회 (소유한 이미지)
             amis = ec2.describe_images(Owners=['self'])
             
-            # AMI가 없으면 PASS 반환
             if not amis['Images']:
                 results.append(self.get_result(
-                    'PASS', 'N/A',
+                    '양호', 'N/A',
                     "이 리전에서 관리 중인 AMI가 없습니다."
                 ))
                 return {'results': results, 'raw': raw, 'guideline_id': 3}
@@ -125,39 +77,68 @@ class EC2AMIPrivateCheck(BaseCheck):
                 ami_id = ami['ImageId']
                 ami_name = ami.get('Name', 'N/A')
                 
-                # LaunchPermission 확인 (public 여부)
-                launch_permissions = ami.get('LaunchPermission', [])
-                is_public = any(perm.get('Group') == 'all' for perm in launch_permissions)
+                try:
+                    launch_perms_response = ec2.describe_image_attribute(
+                        ImageId=ami_id,
+                        Attribute='launchPermission'
+                    )
+                    
+                    launch_permissions = launch_perms_response.get('LaunchPermissions', [])
+                    
+                    # Public 여부 확인 (Group='all'이 있으면 Public)
+                    is_public = any(perm.get('Group') == 'all' for perm in launch_permissions)
+                    
+                    raw.append({
+                        'ami_id': ami_id,
+                        'ami_name': ami_name,
+                        'is_public': is_public,
+                        'launch_permissions': launch_permissions,
+                        'ami_data': ami
+                    })
+                    
+                    if is_public:
+                        results.append(self.get_result(
+                            '취약', ami_id,
+                            f"AMI {ami_name} ({ami_id})이 Public으로 설정되어 있습니다. AMI 가용성을 확인하여 프라이빗으로 설정해야 합니다.",
+                            {
+                                'ami_id': ami_id,
+                                'ami_name': ami_name,
+                                'is_public': True,
+                                'launch_permissions': launch_permissions
+                            }
+                        ))
+                    else:
+                        if launch_permissions:
+                            shared_accounts = [perm.get('UserId') for perm in launch_permissions if 'UserId' in perm]
+                            results.append(self.get_result(
+                                '양호', ami_id,
+                                f"AMI {ami_name} ({ami_id})은 Private이며, {len(shared_accounts)}개 계정과 공유되어 있습니다.",
+                                {
+                                    'ami_id': ami_id,
+                                    'ami_name': ami_name,
+                                    'is_public': False,
+                                    'shared_accounts': shared_accounts
+                                }
+                            ))
+                        else:
+                            results.append(self.get_result(
+                                '양호', ami_id,
+                                f"AMI {ami_name} ({ami_id})은 Private으로 설정되어 있습니다.",
+                                {
+                                    'ami_id': ami_id,
+                                    'ami_name': ami_name,
+                                    'is_public': False
+                                }
+                            ))
                 
-                raw.append({
-                    'ami_id': ami_id,
-                    'ami_name': ami_name,
-                    'is_public': is_public,
-                    'launch_permissions': launch_permissions,
-                    'ami_data': ami
-                })
-                
-                if is_public:
+                except Exception as e:
                     results.append(self.get_result(
-                        'FAIL', ami_id,
-                        f"AMI {ami_name}이 Public으로 설정되어 있습니다.",
-                        {
-                            'ami_name': ami_name,
-                            'is_public': True,
-                            'launch_permissions': launch_permissions
-                        }
+                        '오류', ami_id,
+                        f"AMI {ami_id} 권한 조회 실패: {str(e)}"
                     ))
-                else:
-                    results.append(self.get_result(
-                        'PASS', ami_id,
-                        f"AMI {ami_name}은 Private으로 설정되어 있습니다.",
-                        {
-                            'ami_name': ami_name,
-                            'is_public': False
-                        }
-                    ))
+                    
         except Exception as e:
-            results.append(self.get_result('ERROR', 'N/A', str(e)))
+            results.append(self.get_result('ERROR', 'N/A', f"AMI 목록 조회 실패: {str(e)}"))
         
         return {'results': results, 'raw': raw, 'guideline_id': 3}
 
@@ -172,7 +153,7 @@ class EBSSnapshotPrivateCheck(BaseCheck):
             
             if not snapshots['Snapshots']:
                 results.append(self.get_result(
-                    'PASS', 'N/A',
+                    '양호', 'N/A',
                     "이 리전에서 관리 중인 EBS 스냅샷이 없습니다."
                 ))
                 return {'results': results, 'raw': raw, 'guideline_id': 4}
@@ -199,8 +180,8 @@ class EBSSnapshotPrivateCheck(BaseCheck):
                 
                 if is_public:
                     results.append(self.get_result(
-                        'FAIL', snapshot_id,
-                        f"EBS 스냅샷 {snapshot_id}이 공개로 설정되어 있습니다.",
+                        '취약', snapshot_id,
+                        f"EBS 스냅샷 {snapshot_id}이 공개로 설정되어 있습니다. 소유한 EBS 스냅샷을 Private 상태로 유지해야 합니다.",
                         {
                             'snapshot_description': snapshot_desc,
                             'is_public': True,
@@ -209,7 +190,7 @@ class EBSSnapshotPrivateCheck(BaseCheck):
                     ))
                 else:
                     results.append(self.get_result(
-                        'PASS', snapshot_id,
+                        '양호', snapshot_id,
                         f"EBS 스냅샷 {snapshot_id}은 프라이빗으로 설정되어 있습니다.",
                         {
                             'snapshot_description': snapshot_desc,

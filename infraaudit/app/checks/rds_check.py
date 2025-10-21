@@ -13,6 +13,10 @@ class RDSPublicAccessibilityCheck(BaseCheck):
             db_instances = rds.describe_db_instances()['DBInstances']
             
             if not db_instances:
+                results.append(self.get_result(
+                    '양호', 'N/A',
+                    "RDS 인스턴스가 존재하지 않습니다."
+                ))
                 return {'results': results, 'raw': raw, 'guideline_id': 24}
             
             for db_instance in db_instances:
@@ -119,7 +123,7 @@ class RDSPublicAccessibilityCheck(BaseCheck):
                 if has_public_risk:
                     results.append(self.get_result(
                         '취약', db_identifier,
-                        f"RDS 인스턴스 {db_identifier}가 Public accessibility로 설정되어 있고, 퍼블릭 서브넷 또는 넓은 CIDR 범위의 보안 그룹 규칙이 설정되어 있습니다.",
+                        f"RDS 인스턴스 {db_identifier}가 Public accessibility로 설정되어 있고, 퍼블릭 서브넷 또는 넓은 CIDR 범위의 보안 그룹 규칙이 설정되어 있습니다. 퍼블릭 엑세스 항목을 '아니요'로 변경하고, 보안그룹 인바운드 규칙에 불필요하게 넓은 CIDR를 제거한 뒤, 필요한 범위만 설정했는지 확인해야 합니다.",
                         risk_details
                     ))
                 else:
@@ -149,7 +153,7 @@ class RDSSnapshotPublicAccessCheck(BaseCheck):
             
             if not manual_db_snapshots:
                 results.append(self.get_result(
-                    'PASS', 'N/A',
+                    '양호', 'N/A',
                     "이 리전에서 관리 중인 RDS 수동 DB 스냅샷이 없습니다."
                 ))
             else:
@@ -174,8 +178,8 @@ class RDSSnapshotPublicAccessCheck(BaseCheck):
                     
                     if is_public:
                         results.append(self.get_result(
-                            'FAIL', snapshot_id,
-                            f"RDS DB 스냅샷 {snapshot_id}이 공개로 설정되어 있습니다.",
+                            '취약', snapshot_id,
+                            f"RDS DB 스냅샷 {snapshot_id}이 공개로 설정되어 있습니다. DB 스냅샷 가시성을 Private으로 설정해야합니다.",
                             {
                                 'snapshot_id': snapshot_id,
                                 'is_public': is_public,
@@ -184,7 +188,7 @@ class RDSSnapshotPublicAccessCheck(BaseCheck):
                         ))
                     else:
                         results.append(self.get_result(
-                            'PASS', snapshot_id,
+                            '양호', snapshot_id,
                             f"RDS DB 스냅샷 {snapshot_id}은 프라이빗으로 설정되어 있습니다.",
                             {
                                 'snapshot_id': snapshot_id,
@@ -220,8 +224,8 @@ class RDSSnapshotPublicAccessCheck(BaseCheck):
                     
                     if is_public:
                         results.append(self.get_result(
-                            'FAIL', snapshot_id,
-                            f"RDS 클러스터 스냅샷 {snapshot_id}이 공개로 설정되어 있습니다.",
+                            '취약', snapshot_id,
+                            f"RDS 클러스터 스냅샷 {snapshot_id}이 공개로 설정되어 있습니다. 스냅샷을 Private으로 설정해야합니다.",
                             {
                                 'snapshot_id': snapshot_id,
                                 'is_public': is_public,
@@ -230,7 +234,7 @@ class RDSSnapshotPublicAccessCheck(BaseCheck):
                         ))
                     else:
                         results.append(self.get_result(
-                            'PASS', snapshot_id,
+                            '양호', snapshot_id,
                             f"RDS 클러스터 스냅샷 {snapshot_id}은 프라이빗으로 설정되어 있습니다.",
                             {
                                 'snapshot_id': snapshot_id,
@@ -240,6 +244,6 @@ class RDSSnapshotPublicAccessCheck(BaseCheck):
                         ))
         
         except Exception as e:
-            results.append(self.get_result('ERROR', 'N/A', str(e)))
+            results.append(self.get_result('오류', 'N/A', str(e)))
         
         return {'results': results, 'raw': raw, 'guideline_id': 27}

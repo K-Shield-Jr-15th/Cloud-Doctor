@@ -64,7 +64,7 @@ class IAMTrustPolicyWildcardCheck(BaseCheck):
                 if has_wildcard_without_condition:
                     results.append(self.get_result(
                         '취약', role_name,
-                        f"역할 {role_name}의 신뢰 정책에 Principal이 '*'로 설정되어 있고 Condition이 없습니다.",
+                        f"역할 {role_name}의 신뢰 정책에 Principal이 '*'로 설정되어 있고 Condition이 없습니다. Trust Policy의 Principal: *를 제거하고, 사용할 계정/역할/서비스의 ARN만 명시해야 합니다.",
                         {
                             'role_name': role_name,
                             'trust_policy': trust_policy,
@@ -83,7 +83,7 @@ class IAMTrustPolicyWildcardCheck(BaseCheck):
                         }
                     ))
         except Exception as e:
-            results.append(self.get_result('ERROR', 'N/A', str(e)))
+            results.append(self.get_result('오류', 'N/A', str(e)))
         
         return {'results': results, 'raw': raw, 'guideline_id': 13}
 
@@ -468,7 +468,7 @@ class IAMRootAccessKeyCheck(BaseCheck):
             
             if root_keys > 0:
                 results.append(self.get_result(
-                    'FAIL', 'root',
+                    '취약', 'root',
                     f"Root 계정에 {root_keys}개의 액세스 키가 있습니다. 보안상 Root 계정의 액세스 키는 삭제해야 합니다.",
                     {
                         'key_count': root_keys,
@@ -477,11 +477,11 @@ class IAMRootAccessKeyCheck(BaseCheck):
                 ))
             else:
                 results.append(self.get_result(
-                    'PASS', 'root',
+                    '양호', 'root',
                     "Root 계정에 액세스 키가 없습니다."
                 ))
         except Exception as e:
-            results.append(self.get_result('ERROR', 'root', str(e)))
+            results.append(self.get_result('오류', 'root', str(e)))
         
         return {'results': results, 'raw': raw, 'guideline_id': 15}
 
@@ -532,8 +532,8 @@ class IAMMFACheck(BaseCheck):
             # Root 계정 MFA 미활성화
             if root_mfa_enabled == 0:
                 results.append(self.get_result(
-                    'FAIL', 'root',
-                    "Root 계정에 MFA가 활성화되지 않았습니다.",
+                    '취약', 'root',
+                    "Root 계정에 MFA가 활성화되지 않았습니다. 루트를 포함한 모든 사용자 계정에 MFA가 설정되어야 합니다.",
                     {
                         'mfa_enabled': False,
                         'account_type': 'root'
@@ -541,7 +541,7 @@ class IAMMFACheck(BaseCheck):
                 ))
             else:
                 results.append(self.get_result(
-                    'PASS', 'root',
+                    '양호', 'root',
                     "Root 계정에 MFA가 활성화되어 있습니다.",
                     {
                         'mfa_enabled': True,
@@ -552,8 +552,8 @@ class IAMMFACheck(BaseCheck):
             # IAM 사용자 MFA 확인
             if users_without_mfa:
                 results.append(self.get_result(
-                    'FAIL', 'iam_users',
-                    f"다음 IAM 사용자에 MFA가 설정되지 않았습니다: {', '.join(users_without_mfa)}",
+                    '취약', 'iam_users',
+                    f"다음 IAM 사용자에 MFA가 설정되지 않았습니다: {', '.join(users_without_mfa)}. 모든 사용자 계정에 MFA가 설정되어야 합니다.",
                     {
                         'users_without_mfa': users_without_mfa,
                         'users_with_mfa_count': len(users_with_mfa),
@@ -562,7 +562,7 @@ class IAMMFACheck(BaseCheck):
                 ))
             elif len(users) > 0:
                 results.append(self.get_result(
-                    'PASS', 'iam_users',
+                    '통과', 'iam_users',
                     f"모든 IAM 사용자에 MFA가 설정되어 있습니다.",
                     {
                         'users_with_mfa_count': len(users_with_mfa),
@@ -571,6 +571,6 @@ class IAMMFACheck(BaseCheck):
                 ))
             
         except Exception as e:
-            results.append(self.get_result('ERROR', 'N/A', str(e)))
+            results.append(self.get_result('오류', 'N/A', str(e)))
         
         return {'results': results, 'raw': raw, 'guideline_id': 16}
