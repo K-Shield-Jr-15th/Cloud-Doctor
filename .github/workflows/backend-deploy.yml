@@ -16,6 +16,7 @@ jobs:
       PGSQL_PASSWORD: ${{ secrets.PGSQL_PASSWORD }}
       REDIS_HOST: ${{ secrets.REDIS_HOST }}
       REDIS_PORT: ${{ secrets.REDIS_PORT }}
+      REDIS_PASSWORD: ""
       ACCESS_TOKEN_EXPIRATION: ${{ secrets.ACCESS_TOKEN_EXPIRATION }}
       REFRESH_TOKEN_EXPIRATION: ${{ secrets.REFRESH_TOKEN_EXPIRATION }}
       COOKIE_SECURE: true
@@ -71,6 +72,7 @@ jobs:
               export PGSQL_PASSWORD=${{ secrets.PGSQL_PASSWORD }}
               export REDIS_HOST=${{ secrets.REDIS_HOST }}
               export REDIS_PORT=${{ secrets.REDIS_PORT }}
+              export REDIS_PASSWORD=""
               export ACCESS_TOKEN_EXPIRATION=${{ secrets.ACCESS_TOKEN_EXPIRATION }}
               export REFRESH_TOKEN_EXPIRATION=${{ secrets.REFRESH_TOKEN_EXPIRATION }}
               export COOKIE_SECURE=true
@@ -84,6 +86,7 @@ jobs:
                 -e PGSQL_PASSWORD=\$PGSQL_PASSWORD \
                 -e REDIS_HOST=\$REDIS_HOST \
                 -e REDIS_PORT=\$REDIS_PORT \
+                -e REDIS_PASSWORD=\$REDIS_PASSWORD \
                 -e ACCESS_TOKEN_EXPIRATION=\$ACCESS_TOKEN_EXPIRATION \
                 -e REFRESH_TOKEN_EXPIRATION=\$REFRESH_TOKEN_EXPIRATION \
                 -e COOKIE_SECURE=\$COOKIE_SECURE \
