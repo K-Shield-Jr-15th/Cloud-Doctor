@@ -12,7 +12,7 @@ export default function About() {
           <p className="text-xl md:text-2xl text-primary-light max-w-4xl mx-auto leading-relaxed">
             ISMS-P 인증만으로는 완전한 안전을 보장할 수는 없습니다.
             <br />
-            Clouddoctor는 실제 AWS 침해사례와 공격 기법을 바탕으로 한 실효성
+            Cloud Doctor는 실제 AWS 침해사례와 공격 기법을 바탕으로 한 실효성
             중심의 보안 점검으로, 여러분의 인프라를 현실적으로 안전하게
             만듭니다.
           </p>
@@ -62,7 +62,7 @@ export default function About() {
         {/* CTA */}
         <div className="text-center bg-gradient-to-r from-primary to-accent rounded-3xl p-12 shadow-2xl">
           <p className="text-2xl text-white mb-8 leading-relaxed">
-            Clouddoctor와 함께 최소한의 보안 체계를 신속히 마련하고,
+            Cloud Doctor와 함께 최소한의 보안 체계를 신속히 마련하고,
             <br />
             실제 공격에 강한 운영 환경을 구현할 수 있습니다.
           </p>

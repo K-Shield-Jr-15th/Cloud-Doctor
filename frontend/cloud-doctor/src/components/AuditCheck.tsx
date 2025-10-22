@@ -99,7 +99,7 @@ export default function AuditCheck() {
     <main className="min-h-screen bg-gradient-to-br from-primary-dark via-primary to-primary-dark py-12">
       <div className="p-6 max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-beige to-primary-light bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-8 text-white">
             🔍 AWS 보안 점검
           </h1>
           <button
@@ -339,7 +339,7 @@ export default function AuditCheck() {
             onClick={() => setShowGuideModal(false)}
           >
             <div
-              className="bg-white rounded-lg p-8 w-full max-w-5xl max-h-[90vh] overflow-y-auto"
+              className="bg-primary-light rounded-lg p-8 w-full max-w-5xl max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-4">
@@ -374,7 +374,7 @@ export default function AuditCheck() {
                       className="w-full rounded"
                     />
                   </div>
-                  <p>상단 검색창에서 CloudFormation 검색</p>
+                  <p>AWS 콘솔 상단 검색창에서 CloudFormation 검색</p>
                 </div>
                 <div className="bg-beige p-4 rounded-lg">
                   <h3 className="font-bold text-lg mb-3">2️⃣ 새 리소스 생성</h3>
@@ -397,8 +397,8 @@ export default function AuditCheck() {
                     />
                   </div>
                   <ul className="list-disc ml-6 mt-2 space-y-1">
-                    <li>기존 템플릿 선택 → 템플릿 파일 업로드</li>
-                    <li>템플릿 파일 업로드 - 파일 선택</li>
+                    <li>기존 템플릿 선택 → 템플릿 파일 업로드 선택</li>
+                    <li>템플릿 파일 업로드 → 파일 선택</li>
                     <li>
                       위에서 다운로드 한 clouddoctor-role.yaml 선택 후 업로드
                     </li>
@@ -417,7 +417,7 @@ export default function AuditCheck() {
                     />
                   </div>
                   <ul className="list-disc ml-6 mt-2 space-y-1">
-                    <li>Stack name: [스택 명]</li>
+                    <li>스택 이름: [스택 명] 입력</li>
                     <li>다음 클릭</li>
                   </ul>
                 </div>
@@ -431,7 +431,7 @@ export default function AuditCheck() {
                     />
                   </div>
                   <ul className="list-disc ml-6 mt-2 space-y-1">
-                    <li>기능) IAM resources 생성 허용 체크</li>
+                    <li>기능 - IAM resources 생성 허용 체크</li>
                     <li>다음 클릭</li>
                   </ul>
                 </div>
@@ -444,7 +444,10 @@ export default function AuditCheck() {
                       className="w-full rounded"
                     />
                   </div>
-                  <p>입력 정보 확인 후 전송 클릭</p>
+                  <ul className="list-disc ml-6 mt-2 space-y-1">
+                    <li>입력 정보 확인</li>
+                    <li>전송 클릭</li>
+                  </ul>
                 </div>
                 <div className="bg-beige p-4 rounded-lg">
                   <h3 className="font-bold text-lg mb-3">7️⃣ 생성 완료 확인</h3>

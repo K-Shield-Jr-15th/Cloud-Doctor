@@ -2,27 +2,37 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: >
   CloudDoctor 고객사용 Audit Role
   - 권한정책: 읽기 전용/점검용
-  - 신뢰정책: SaaS 계정에서 sts:AssumeRole 허용
+  - 신뢰정책: CloudDoctor SaaS 계정에서 sts:AssumeRole 허용 (ExternalId 포함)
+
+Parameters:
+  ExternalId:
+    Type: String
+    Description: CloudDoctor SaaS에서 제공한 고객별 External ID 값을 입력하세요.
 
 Resources:
   CloudDoctorAuditRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName: CloudDoctorAuditRole
-      Description: Role for CloudDoctor SaaS to perform audit in customer account
+      Description: Role for CloudDoctor SaaS to perform security audit in customer account
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
-              AWS: "arn:aws:iam::346448660196:user/clouddoctortest"
+              AWS: "arn:aws:iam::<saas계정 ID>user/<saas계정 유저>"
             Action: "sts:AssumeRole"
+            Condition:
+              StringEquals:
+                sts:ExternalId: "<고객-ExternalID>"
+
       Policies:
         - PolicyName: CloudDoctorAuditPermissions
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              - Effect: Allow
+              - Sid: CloudDoctorAuditPermissions
+                Effect: Allow
                 Action:
                   - iam:GetAccountSummary
                   - iam:ListUsers
@@ -113,3 +123,11 @@ Resources:
                   - lambda:ListFunctions
                   - lambda:GetFunctionConfiguration
                 Resource: "*"
+
+Outputs:
+  RoleName:
+    Description: 생성된 IAM Role 이름
+    Value: !Ref CloudDoctorAuditRole
+  RoleArn:
+    Description: 생성된 IAM Role의 ARN
+    Value: !GetAtt CloudDoctorAuditRole.Arn

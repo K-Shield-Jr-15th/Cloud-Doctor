@@ -1,21 +1,26 @@
 from .base_check import BaseCheck
 from typing import List, Dict
-from datetime import datetime
 import json
 
 class ECRRepositorySecurityCheck(BaseCheck):
     async def check(self) -> List[Dict]:
-        ecr = self.session.client('ecr')
         results = []
         raw = []
         
         try:
+            ecr = self.session.client('ecr')
+            
+            # 현재 리전 정보 확인
+            current_region = ecr.meta.region_name
+            raw.append({'current_region': current_region})
+            
+            # ECR 리포지토리 조회
             repositories = ecr.describe_repositories()
             
             if not repositories.get('repositories'):
                 results.append(self.get_result(
                     'PASS', 'N/A',
-                    "ECR 리포지토리가 없습니다."
+                    f"ECR 리포지토리가 없습니다. (리전: {current_region})"
                 ))
                 return {'results': results, 'raw': raw, 'guideline_id': 43}
             
@@ -25,10 +30,15 @@ class ECRRepositorySecurityCheck(BaseCheck):
                 
                 # 리포지토리 정책 조회
                 policy_str = None
+                policy_check_skipped = False
                 try:
                     policy_response = ecr.get_repository_policy(repositoryName=repo_name)
                     policy_str = policy_response.get('repositoryPolicy')
                 except ecr.exceptions.RepositoryPolicyNotFoundException:
+                    policy_str = None
+                except Exception as policy_error:
+                    # 권한 오류 등으로 정책 조회 실패
+                    policy_check_skipped = True
                     policy_str = None
                 
                 # 이미지 스캔 활성화 여부
@@ -41,7 +51,12 @@ class ECRRepositorySecurityCheck(BaseCheck):
                 violations = []
                 
                 # 정책 검사
-                if policy_str:
+                if policy_check_skipped:
+                    # 정책 검사를 건너뛴 경우 알림 추가
+                    violations.append({
+                        'type': '정책 검사 건너뛰 (권한 부족)'
+                    })
+                elif policy_str:
                     policy = json.loads(policy_str)
                     statements = policy.get('Statement', [])
                     
@@ -72,9 +87,6 @@ class ECRRepositorySecurityCheck(BaseCheck):
                                 'has_push': has_push,
                                 'has_pull': has_pull
                             })
-                else:
-                    # 정책이 없으면 기본적으로 제한됨
-                    pass
                 
                 # 이미지 스캔 비활성화 확인
                 if not image_scan_enabled:
@@ -92,6 +104,7 @@ class ECRRepositorySecurityCheck(BaseCheck):
                     'repo_name': repo_name,
                     'repo_arn': repo_arn,
                     'policy': policy_str,
+                    'policy_check_skipped': policy_check_skipped,
                     'image_scan_enabled': image_scan_enabled,
                     'tag_immutable_enabled': tag_immutable_enabled,
                     'violations': violations,
@@ -121,7 +134,24 @@ class ECRRepositorySecurityCheck(BaseCheck):
                         }
                     ))
         
+        except ecr.exceptions.ClientError as e:
+            error_code = e.response['Error']['Code']
+            error_message = e.response['Error']['Message']
+            
+            if error_code == 'UnauthorizedOperation':
+                results.append(self.get_result(
+                    'ERROR', 'N/A', 
+                    f"ECR 접근 권한이 없습니다: {error_message}"
+                ))
+            else:
+                results.append(self.get_result(
+                    'ERROR', 'N/A', 
+                    f"ECR 오류 ({error_code}): {error_message}"
+                ))
         except Exception as e:
-            results.append(self.get_result('ERROR', 'N/A', str(e)))
+            results.append(self.get_result(
+                'ERROR', 'N/A', 
+                f"예상치 못한 오류: {str(e)}"
+            ))
         
         return {'results': results, 'raw': raw, 'guideline_id': 43}
