@@ -163,6 +163,67 @@ GET http://localhost:8000/health
 }
 ```
 
+## 사용자용 IAM
+
+```json
+Rolename: CloudDoctorAuditRole
+신뢰정책
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::346448660196:root"
+      },
+      "Action": "sts:AssumeRole",
+      "Condition": {
+        "StringEquals": {
+          "sts:ExternalId": "<고객별-ExternalID>"
+        }
+      }
+    }
+  ]
+}
+
+권한정책
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CloudDoctorAuditPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "iam:GetAccountSummary",
+        "iam:ListUsers",
+        "iam:ListRoles",
+        "iam:ListPolicies",
+        "iam:ListAttachedUserPolicies",
+        "iam:ListAttachedRolePolicies",
+        "iam:GetPolicy",
+        "iam:GetPolicyVersion",
+        "ec2:Describe*",
+        "s3:ListAllMyBuckets",
+        "s3:GetBucketAcl",
+        "s3:GetBucketPolicy",
+        "kms:ListKeys",
+        "kms:DescribeKey",
+        "kms:GetKeyPolicy",
+        "cloudtrail:DescribeTrails",
+        "cloudtrail:GetEventSelectors",
+        "cloudtrail:GetTrailStatus",
+        "cloudformation:DescribeStacks",
+        "rds:Describe*",
+        "sns:ListTopics",
+        "sns:GetTopicAttributes"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+
 ## 지원 점검 항목
 
 ### IAM

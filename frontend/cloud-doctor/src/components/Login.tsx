@@ -147,7 +147,7 @@ export default function Login({ showRegister = true }: LoginProps) {
                   setUsernameChecked(false);
                   setUsernameAvailable(false);
                 }}
-                placeholder="사용자명"
+                placeholder="아이디"
                 className="flex-1 p-3 bg-primary-dark/50 border-2 border-primary text-beige rounded-lg focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all placeholder:text-primary-light"
                 required
               />
@@ -155,7 +155,7 @@ export default function Login({ showRegister = true }: LoginProps) {
                 type="button"
                 onClick={async () => {
                   if (!username.trim()) {
-                    setError('사용자명을 입력해주세요.');
+                    setError('아이디를 입력해주세요.');
                     return;
                   }
                   const exists = await adminApi.checkUsername(username);
@@ -180,7 +180,7 @@ export default function Login({ showRegister = true }: LoginProps) {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="사용자명"
+              placeholder="아이디"
               className="w-full p-3 bg-primary-dark/50 border-2 border-primary text-beige rounded-lg focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all placeholder:text-primary-light"
               required
             />

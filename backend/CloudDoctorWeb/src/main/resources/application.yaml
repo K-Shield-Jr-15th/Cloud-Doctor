@@ -53,3 +53,8 @@ aws:
   # credentials:
     # access-key: ${AWS_ACCESS_KEY_ID}
     # secret-key: ${AWS_SECRET_ACCESS_KEY}
+
+# infraaudit 인프라 보안 점검 FastAPI 서비스 주소
+infraaudit:
+  api:
+    url: ${INFRAAUDIT_API_URL}  # 기본값: 로컬

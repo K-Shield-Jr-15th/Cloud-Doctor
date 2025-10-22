@@ -18,7 +18,7 @@ public interface JwtService {
     String generateRefreshToken(User user, String userAgent);
     
     /**
-     * 토큰에서 사용자명 추출
+     * 토큰에서 아이디 추출
      */
     String extractUsername(String token);
     

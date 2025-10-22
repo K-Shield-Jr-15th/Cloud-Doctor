@@ -34,7 +34,7 @@ public class AuthServiceImpl implements AuthService {
         
         // 중복 체크
         if (userRepository.findByUsername(registerRequest.getUsername()).isPresent()) {
-            throw new RuntimeException("이미 존재하는 사용자명입니다");
+            throw new RuntimeException("이미 존재하는 아이디입니다");
         }
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
             throw new RuntimeException("이미 사용 중인 이메일입니다");
