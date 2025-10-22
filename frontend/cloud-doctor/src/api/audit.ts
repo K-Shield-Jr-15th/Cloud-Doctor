@@ -80,7 +80,6 @@ export const AVAILABLE_CHECKS = [
     name: "S3 버킷 복제 규칙 설정",
     category: "s3",
   },
-  { id: "IAMRootMFACheck", name: "루트 계정 MFA", category: "iam" },
   {
     id: "IAMTrustPolicyWildcardCheck",
     name: "IAM 신뢰 정책 와일드카드",
@@ -98,7 +97,12 @@ export const AVAILABLE_CHECKS = [
     category: "iam",
   },
   { id: "IAMRootAccessKeyCheck", name: "루트 계정 액세스 키", category: "iam" },
-  { id: "IAMMFACheck", name: "IAM 사용자 MFA", category: "iam" },
+  { id: "IAMMFACheck", name: "모든 계정 사용자 MFA", category: "iam" },
+  {
+    id: "IAMPassRoleWildcardResourceCheck",
+    name: "IAM PassRole 와일드카드 리소스",
+    category: "iam",
+  },
   { id: "EKSIRSARoleCheck", name: "EKS IRSA 역할 권한 검증", category: "eks" },
   {
     id: "KMSImportedKeyMaterialCheck",
@@ -155,6 +159,11 @@ export const AVAILABLE_CHECKS = [
     name: "RDS 퍼블릭 액세스 차단",
     category: "rds",
   },
+  {
+    id: "RDSSnapshotPublicAccessCheck",
+    name: "RDS 스냅샷 퍼블릭 액세스 치단",
+    category: "rds",
+  },
   { id: "SNSAccessPolicyCheck", name: "SNS 액세스 정책", category: "sns" },
   { id: "SQSAccessPolicyCheck", name: "SQS 액세스 정책", category: "sqs" },
   {
@@ -163,6 +172,11 @@ export const AVAILABLE_CHECKS = [
     category: "ses",
   },
   { id: "IAMSSMCommandPolicyCheck", name: "SSM 명령 정책", category: "ssm" },
+  {
+    id: "SSMDocumentPublicAccessCheck",
+    name: "SSM 문서 퍼블릭 액세스",
+    category: "ssm",
+  },
   {
     id: "BedrockModelAccessCheck",
     name: "Bedrock 모델 액세스",
@@ -175,8 +189,8 @@ export const AVAILABLE_CHECKS = [
   },
   {
     id: "SecurityGroupRemoteAccessCheck",
-    name: "보안 그룹 원격 액세스 검증",
-    category: "ec2",
+    name: "Security Group SSH/RDP 접근 제한",
+    category: "vpc",
   },
   {
     id: "S3EncryptionCheck",
@@ -184,7 +198,7 @@ export const AVAILABLE_CHECKS = [
     category: "s3",
   },
   {
-    id: "ECRRepositorySecurityCheck",
+    id: "OrganizationsSCPCheck",
     name: "ECR 리포지토리 보안 설정",
     category: "ecr",
   },

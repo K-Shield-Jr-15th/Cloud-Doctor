@@ -4,8 +4,8 @@ from typing import Dict, List
 from app.core.aws_client import AWSClientManager
 from app.checks.ec2_checks import EC2IMDSv2Check, EC2AMIPrivateCheck, EBSSnapshotPrivateCheck, SecurityGroupRemoteAccessCheck
 from app.checks.s3_checks import S3PublicAccessAndPolicyCheck, S3ACLCheck, S3ReplicationRuleCheck, S3EncryptionCheck
-from app.checks.iam_checks import IAMRootMFACheck, IAMTrustPolicyWildcardCheck, IAMIdPAssumeRoleCheck, IAMCrossAccountAssumeRoleCheck, IAMAccessKeyAgeCheck, IAMRootAccessKeyCheck, IAMMFACheck
-from app.checks.rds_check import RDSPublicAccessibilityCheck
+from app.checks.iam_checks import IAMTrustPolicyWildcardCheck, IAMIdPAssumeRoleCheck, IAMCrossAccountAssumeRoleCheck, IAMAccessKeyAgeCheck, IAMRootAccessKeyCheck, IAMMFACheck, IAMPassRoleWildcardResourceCheck
+from app.checks.rds_check import RDSPublicAccessibilityCheck, RDSSnapshotPublicAccessCheck
 from app.checks.cloudtrail_check import CloudTrailManagementEventsCheck, CloudTrailLoggingCheck
 from app.checks.eks_checks import EKSIRSARoleCheck
 from app.checks.kms_checks import KMSImportedKeyMaterialCheck
@@ -13,7 +13,7 @@ from app.checks.sns_check import SNSAccessPolicyCheck
 from app.checks.sqs_check import SQSAccessPolicyCheck
 from app.checks.organizations_check import OrganizationsSCPCheck
 from app.checks.ecr_checks import ECRRepositorySecurityCheck
-from app.checks.ssm_check import IAMSSMCommandPolicyCheck
+from app.checks.ssm_check import IAMSSMCommandPolicyCheck, SSMDocumentPublicAccessCheck
 from app.checks.guardduty_checks import GuardDutyStatusCheck
 from app.checks.cognito_check import CognitoTokenExpirationCheck
 from app.checks.cloudformation_check import IAMRoleCloudFormationPassRoleCheck
@@ -61,6 +61,7 @@ class AuditService:
             'SQSAccessPolicyCheck': SQSAccessPolicyCheck,
             'SESOverlyPermissiveCheck': SESOverlyPermissiveCheck,
             'IAMSSMCommandPolicyCheck': IAMSSMCommandPolicyCheck,
+            'SSMDocumentPublicAccessCheck': SSMDocumentPublicAccessCheck,
             'BedrockModelAccessCheck': BedrockModelAccessCheck,
             'AppStreamOverlyPermissiveCheck': AppStreamOverlyPermissiveCheck,
             'SecurityGroupRemoteAccessCheck': SecurityGroupRemoteAccessCheck,
@@ -69,6 +70,7 @@ class AuditService:
             'RedshiftEncryptionCheck': RedshiftEncryptionCheck,
             'DocumentDBSnapshotPrivateCheck': DocumentDBSnapshotPrivateCheck,
             'DocumentDBEncryptionCheck': DocumentDBEncryptionCheck,
+            'RDSSnapshotPublicAccessCheck': RDSSnapshotPublicAccessCheck,
         }
     
     async def run_audit(self, account_id: str, role_name: str, checks: List[str] = None, external_id: str = None) -> Dict:

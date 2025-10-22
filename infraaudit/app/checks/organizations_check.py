@@ -1,6 +1,6 @@
 import json
 from .base_check import BaseCheck
-from typing import Dict
+from typing import List, Dict
 
 class OrganizationsSCPCheck(BaseCheck):
     async def check(self) -> Dict:

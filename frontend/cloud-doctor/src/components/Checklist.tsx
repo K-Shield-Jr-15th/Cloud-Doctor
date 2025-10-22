@@ -112,7 +112,7 @@ export default function Checklist() {
       className="min-h-screen bg-gradient-to-br from-primary-dark via-primary to-primary-dark py-12"
     >
       <div className="p-6 max-w-5xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-beige to-primary-light bg-clip-text text-transparent">
+        <h1 className="text-4xl font-bold mb-8 text-white">
           🛡️ AWS 보안 체크리스트
         </h1>
 
@@ -236,32 +236,32 @@ export default function Checklist() {
                     </td>
                     <td className="border border-primary p-4">
                       <div className="flex justify-center gap-1 md:gap-2">
-                      {/* O 버튼 */}
-                      <button
-                        className={`w-8 h-8 md:w-10 md:h-10 rounded-lg font-bold text-sm md:text-lg transition-all ${
-                          answer === true
-                            ? "bg-gradient-to-br from-green-600 to-green-700 text-white shadow-lg scale-110"
-                            : "bg-primary-dark/50 text-surface border-2 border-primary hover:border-green-500 hover:text-green-400 hover:scale-105"
-                        }`}
-                        onClick={() =>
-                          setAnswers({ ...answers, [item.id]: true })
-                        }
-                      >
-                        O
-                      </button>
-                      {/* X 버튼 */}
-                      <button
-                        className={`w-8 h-8 md:w-10 md:h-10 rounded-lg font-bold text-sm md:text-lg transition-all ${
-                          answer === false
-                            ? "bg-gradient-to-br from-rose-600 to-red-600 text-white shadow-lg scale-110"
-                            : "bg-slate-700/50 text-slate-400 border-2 border-slate-600 hover:border-rose-500 hover:text-rose-400 hover:scale-105"
-                        }`}
-                        onClick={() =>
-                          setAnswers({ ...answers, [item.id]: false })
-                        }
-                      >
-                        X
-                      </button>
+                        {/* O 버튼 */}
+                        <button
+                          className={`w-8 h-8 md:w-10 md:h-10 rounded-lg font-bold text-sm md:text-lg transition-all ${
+                            answer === true
+                              ? "bg-gradient-to-br from-green-600 to-green-700 text-white shadow-lg scale-110"
+                              : "bg-primary-dark/50 text-surface border-2 border-primary hover:border-green-500 hover:text-green-400 hover:scale-105"
+                          }`}
+                          onClick={() =>
+                            setAnswers({ ...answers, [item.id]: true })
+                          }
+                        >
+                          O
+                        </button>
+                        {/* X 버튼 */}
+                        <button
+                          className={`w-8 h-8 md:w-10 md:h-10 rounded-lg font-bold text-sm md:text-lg transition-all ${
+                            answer === false
+                              ? "bg-gradient-to-br from-rose-600 to-red-600 text-white shadow-lg scale-110"
+                              : "bg-slate-700/50 text-slate-400 border-2 border-slate-600 hover:border-rose-500 hover:text-rose-400 hover:scale-105"
+                          }`}
+                          onClick={() =>
+                            setAnswers({ ...answers, [item.id]: false })
+                          }
+                        >
+                          X
+                        </button>
                       </div>
                     </td>
                   </tr>

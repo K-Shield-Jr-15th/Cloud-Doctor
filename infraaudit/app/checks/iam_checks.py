@@ -2,6 +2,7 @@ from .base_check import BaseCheck
 from datetime import datetime
 from typing import List, Dict
 
+# 루트 mfa삭제
 class IAMRootMFACheck(BaseCheck):
     async def check(self) -> List[Dict]:
         iam = self.session.client('iam')
