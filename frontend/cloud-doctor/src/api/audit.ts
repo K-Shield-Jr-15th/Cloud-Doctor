@@ -81,6 +81,11 @@ export const AVAILABLE_CHECKS = [
     category: "s3",
   },
   {
+    id: "S3EncryptionCheck",
+    name: "S3 버킷 암호화 설정",
+    category: "s3",
+  },
+  {
     id: "IAMTrustPolicyWildcardCheck",
     name: "IAM 신뢰 정책 와일드카드",
     category: "iam",
@@ -155,6 +160,11 @@ export const AVAILABLE_CHECKS = [
     category: "organizations",
   },
   {
+    id: "RedshiftEncryptionCheck",
+    name: "Redshift 암호화 설정",
+    category: "redshift",
+  },
+  {
     id: "RDSPublicAccessibilityCheck",
     name: "RDS 퍼블릭 액세스 차단",
     category: "rds",
@@ -178,6 +188,16 @@ export const AVAILABLE_CHECKS = [
     category: "ssm",
   },
   {
+    id: "DocumentDBSnapshotPrivateCheck",
+    name: "DocumentDB 스냅샷 프라이빗 설정",
+    category: "documentdb",
+  },
+  {
+    id: "DocumentDBEncryptionCheck",
+    name: "DocumentDB 암호화 설정",
+    category: "documentdb",
+  },
+  {
     id: "BedrockModelAccessCheck",
     name: "Bedrock 모델 액세스",
     category: "bedrock",
@@ -192,29 +212,10 @@ export const AVAILABLE_CHECKS = [
     name: "Security Group SSH/RDP 접근 제한",
     category: "vpc",
   },
-  {
-    id: "S3EncryptionCheck",
-    name: "S3 버킷 암호화 설정",
-    category: "s3",
-  },
+
   {
     id: "OrganizationsSCPCheck",
     name: "ECR 리포지토리 보안 설정",
     category: "ecr",
-  },
-  {
-    id: "RedshiftEncryptionCheck",
-    name: "Redshift 암호화 설정",
-    category: "redshift",
-  },
-  {
-    id: "DocumentDBSnapshotPrivateCheck",
-    name: "DocumentDB 스냅샷 프라이빗 설정",
-    category: "documentdb",
-  },
-  {
-    id: "DocumentDBEncryptionCheck",
-    name: "DocumentDB 암호화 설정",
-    category: "documentdb",
   },
 ];

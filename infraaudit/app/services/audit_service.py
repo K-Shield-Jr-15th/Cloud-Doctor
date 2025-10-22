@@ -38,7 +38,6 @@ class AuditService:
             'S3PublicAccessAndPolicyCheck': S3PublicAccessAndPolicyCheck,
             'S3ACLCheck': S3ACLCheck,
             'S3ReplicationRuleCheck': S3ReplicationRuleCheck,
-            'IAMRootMFACheck': IAMRootMFACheck,
             'IAMTrustPolicyWildcardCheck': IAMTrustPolicyWildcardCheck,
             'IAMIdPAssumeRoleCheck': IAMIdPAssumeRoleCheck,
             'IAMCrossAccountAssumeRoleCheck': IAMCrossAccountAssumeRoleCheck,
