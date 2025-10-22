@@ -46,7 +46,7 @@ public class AuthController {
     /**
      * 아이디 중복확인
      */
-    @Operation(summary = "아이디 중복확인", description = "사용자명 중복 여부 확인")
+    @Operation(summary = "아이디 중복확인", description = "아이디 중복 여부 확인")
     @GetMapping("/check-username")
     public ResponseEntity<Map<String, Boolean>> checkUsername(@RequestParam String username) {
         boolean exists = authService.existsByUsername(username);

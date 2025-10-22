@@ -11,7 +11,10 @@ app.add_middleware(
         "http://localhost:3001",
         "https://localhost:3000",
         "https://localhost:3001",
-        "https://web.takustory.site"
+        "https://web.takustory.site",
+        "https://api.cloud-doctor.site",
+        "https://www.cloud-doctor.site",
+        "https://cloud-doctor.site"
     ],
     allow_credentials=True,
     allow_methods=["*"],

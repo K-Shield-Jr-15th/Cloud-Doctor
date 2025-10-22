@@ -10,7 +10,7 @@ import lombok.Data;
 @Schema(description = "회원가입 요청")
 public class RegisterRequest {
     
-    @Schema(description = "사용자명", example = "user123", required = true)
+    @Schema(description = "아이디", example = "user123", required = true)
     private String username;
     
     @Schema(description = "이메일 (@ 포함 필수)", example = "user@example.com", required = true)

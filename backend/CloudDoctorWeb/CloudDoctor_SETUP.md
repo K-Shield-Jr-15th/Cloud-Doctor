@@ -53,7 +53,7 @@ docker-compose up -d
 -- 특정 사용자를 관리자로 변경
 UPDATE users 
 SET role = 'ADMIN' 
-WHERE username = '사용자명';
+WHERE username = '아이디';
 
 -- 또는 이메일로 변경
 UPDATE users 

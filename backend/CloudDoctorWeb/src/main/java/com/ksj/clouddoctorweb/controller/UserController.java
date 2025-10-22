@@ -2,6 +2,7 @@ package com.ksj.clouddoctorweb.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ksj.clouddoctorweb.dto.ChangePasswordRequest;
+import com.ksj.clouddoctorweb.dto.InfraAuditRequest;
 import com.ksj.clouddoctorweb.dto.SaveChecklistRequest;
 import com.ksj.clouddoctorweb.entity.User;
 import com.ksj.clouddoctorweb.entity.UserChecklistResult;
@@ -12,13 +13,20 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("/api/user")
@@ -33,12 +41,69 @@ public class UserController {
     private final UserChecklistResultRepository checklistResultRepository;
     private final ObjectMapper objectMapper;
     
+    @Value("${infraaudit.api.url}")
+    private String infraauditApiUrl;
+    
     @Operation(summary = "내 정보 조회", description = "로그인한 사용자의 정보 조회")
     @GetMapping("/me")
     public ResponseEntity<User> getMyInfo(Authentication authentication) {
         User user = userRepository.findByUsername(authentication.getName())
             .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다"));
         return ResponseEntity.ok(user);
+    }
+    
+    @Operation(summary = "내 UUID 조회", description = "AWS 인프라 점검용 External ID 조회")
+    @GetMapping("/uuid")
+    public ResponseEntity<String> getMyUuid(Authentication authentication) {
+        User user = userRepository.findByUsername(authentication.getName())
+            .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다"));
+        String externalId = "clouddoctor-" + user.getExternalId();
+        return ResponseEntity.ok(externalId);
+    }
+    
+    @Operation(summary = "인프라 보안 점검 시작", description = "AWS 인프라 보안 점검 시작 (UUID 검증 포함)")
+    @PostMapping("/audit/start")
+    public ResponseEntity<?> startInfraAudit(@RequestBody InfraAuditRequest request, Authentication authentication) {
+        try {
+            User user = userRepository.findByUsername(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다"));
+            
+            String expectedUuid = "clouddoctor-" + user.getExternalId();
+            
+            // UUID 일치 확인
+            if (!expectedUuid.equals(request.getExternalId())) {
+                log.warn("계정 불일치: expected={}, provided={}", expectedUuid, request.getExternalId());
+                return ResponseEntity.badRequest().body("계정 불일치: AWS Role의 ExternalId를 확인해주세요");
+            }
+            
+            // TODO: 진행 중인 점검 확인 로직 추가
+            
+            // Python infraaudit API 호출
+            String pythonApiUrl = infraauditApiUrl + "/api/audit/start";
+            
+            // 요청 데이터 준비
+            Map<String, Object> auditRequest = new HashMap<>();
+            auditRequest.put("account_id", request.getAccountId());
+            auditRequest.put("role_name", request.getRoleName());
+            auditRequest.put("external_id", request.getExternalId());
+            auditRequest.put("checks", request.getChecks());
+            
+            // HTTP 요청 전송
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(auditRequest, headers);
+            
+            ResponseEntity<String> pythonResponse = restTemplate.postForEntity(pythonApiUrl, entity, String.class);
+            
+            log.info("인프라 점검 시작 성공: user={}, accountId={}, response={}", 
+                user.getUsername(), request.getAccountId(), pythonResponse.getBody());
+            
+            return ResponseEntity.ok(pythonResponse.getBody());
+        } catch (Exception e) {
+            log.error("인프라 점검 시작 실패", e);
+            return ResponseEntity.badRequest().body("점검 시작에 실패했습니다: " + e.getMessage());
+        }
     }
     
     @Operation(summary = "비밀번호 변경", description = "현재 비밀번호 확인 후 새 비밀번호로 변경")

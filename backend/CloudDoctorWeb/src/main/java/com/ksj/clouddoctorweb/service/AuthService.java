@@ -41,7 +41,7 @@ public interface AuthService {
     TokenResponse refreshToken(String refreshToken, String userAgent);
     
     /**
-     * 사용자명 중복 확인
+     * 아이디 중복 확인
      */
     boolean existsByUsername(String username);
     

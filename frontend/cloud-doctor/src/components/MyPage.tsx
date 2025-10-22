@@ -95,7 +95,7 @@ export default function MyPage() {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-primary-light">
-                사용자명:
+                아이디:
               </span>
               <span className="text-beige">{userInfo.username}</span>
             </div>

@@ -18,7 +18,7 @@ export default function AdminRegister({ onSwitchToLogin }: AdminRegisterProps) {
     }
 
     if (localStorage.getItem('admin_' + username)) {
-      alert('이미 존재하는 사용자명입니다.');
+      alert('이미 존재하는 아이디입니다.');
       return;
     }
 
@@ -37,7 +37,7 @@ export default function AdminRegister({ onSwitchToLogin }: AdminRegisterProps) {
       <h2 className="text-2xl font-bold mb-6 text-center">관리자 회원가입</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">사용자명</label>
+          <label className="block text-sm font-medium mb-2">아이디</label>
           <input
             type="text"
             value={username}
