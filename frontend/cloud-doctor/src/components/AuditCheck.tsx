@@ -203,7 +203,7 @@ export default function AuditCheck() {
             </div>
 
             <div>
-              <label className="block text-beige mb-2">Role Name</label>
+              <label className="block text-beige mb-2">Role Name *</label>
               <input
                 type="text"
                 value={roleName}
@@ -219,10 +219,10 @@ export default function AuditCheck() {
                 <input
                   type="text"
                   value={externalId}
-                  onChange={(e) => setExternalId(e.target.value)}
-                  placeholder="확인 & 복사 버튼으로 UUID 생성"
+                  readOnly
                   required
-                  className="flex-1 px-4 py-2 rounded bg-white/20 text-white placeholder-white/50"
+                  placeholder="확인 & 복사 버튼으로 UUID 생성"
+                  className="flex-1 px-4 py-2 rounded bg-white/10 text-white/90 placeholder-white/50 cursor-not-allowed"
                 />
                 <button
                   type="button"
