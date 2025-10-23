@@ -126,7 +126,7 @@ export const AVAILABLE_CHECKS = [
   },
   {
     id: "RDSSnapshotPublicAccessCheck",
-    name: "RDS 스냅샷 퍼블릭 액세스 치단",
+    name: "RDS 스냅샷 퍼블릭 액세스 차단",
     category: "rds",
   },
   {
