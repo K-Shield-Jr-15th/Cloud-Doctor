@@ -93,11 +93,16 @@ public class UserController {
             auditRequest.put("external_id", request.getExternalId());
             auditRequest.put("checks", request.getChecks());
             
-            // HTTP 요청 전송
+            // HTTP 요청 전송 (타임아웃 설정)
             RestTemplate restTemplate = new RestTemplate();
+            restTemplate.getRequestFactory().setConnectTimeout(30000); // 30초
+            restTemplate.getRequestFactory().setReadTimeout(300000);   // 5분
+            
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(auditRequest, headers);
+            
+            log.info("파이썬 API 요청: URL={}, data={}", pythonApiUrl, auditRequest);
             
             ResponseEntity<String> pythonResponse = restTemplate.postForEntity(pythonApiUrl, entity, String.class);
             
