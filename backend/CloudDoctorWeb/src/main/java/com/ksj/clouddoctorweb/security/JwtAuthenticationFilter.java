@@ -160,19 +160,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     }
                 } else {
                     log.warn("토큰 검증 실패 (만료 또는 부정): {}, Redis 토큰 상태 확인 필요", username);
-                    // 403 대신 401 명시적 반환
                     SecurityContextHolder.clearContext();
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"error\":\"Token expired or invalid\", \"logout\": true}");
-                    return;
+                    
+                    // 인증 필요 엔드포인트에서만 401 반환, 비회원 접근 가능 경로는 통과
+                    if (isAuthRequiredEndpoint(requestURI)) {
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.setContentType("application/json");
+                        response.getWriter().write("{\"error\":\"Token expired or invalid\", \"logout\": true}");
+                        return;
+                    }
+                    // 비회원 접근 가능 경로는 그냥 통과
+                    log.info("토큰 만료되었지만 비회원 접근 가능 경로: {}", requestURI);
                 }
             } catch (Exception e) {
                 log.warn("토큰 처리 중 오류: {}", e.getMessage());
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json");
-                response.getWriter().write("{\"error\":\"Authentication failed\", \"logout\": true}");
-                return;
+                SecurityContextHolder.clearContext();
+                
+                // 인증 필요 엔드포인트에서만 401 반환
+                if (isAuthRequiredEndpoint(requestURI)) {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"Authentication failed\", \"logout\": true}");
+                    return;
+                }
             }
         }
         
