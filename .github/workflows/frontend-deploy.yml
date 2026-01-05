@@ -48,7 +48,7 @@ jobs:
         uses: appleboy/scp-action@v0.1.5
         with:
           host: ${{ secrets.BASTION_PUBLIC_IP }}
-          username: ubuntu
+          username: ec2-user
           key: ${{ secrets.BASTION_SSH_KEY }}
           source: "frontend/cloud-doctor/build.tar.gz"
           target: "/home/ubuntu/"
@@ -58,7 +58,7 @@ jobs:
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.BASTION_PUBLIC_IP }}
-          username: ubuntu
+          username: ec2-user
           key: ${{ secrets.BASTION_SSH_KEY }}
           script: |
             # 1. Private EC2로 전송
